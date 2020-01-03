@@ -1,5 +1,5 @@
 BIN := bin/gocc
-${BIN}: main.go
+${BIN}: main.go token/token.go
 	go build -o $@ $<
 
 .PHONY: test

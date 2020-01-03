@@ -5,12 +5,18 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+
+	"github.com/potsbo/gocc/token"
+)
+
+var (
+	debug = true
 )
 
 func main() {
 	err := compile()
 	if err != nil {
-		fmt.Fprintf(os.Stderr, err.Error())
+		fmt.Fprintf(os.Stderr, "%s\n", err.Error())
 		os.Exit(1)
 	}
 }
@@ -24,50 +30,58 @@ func compile() error {
 	fmt.Println(".global _main")
 	fmt.Println("_main:")
 
-	str, i, err := strtoint(os.Args[1])
+	t, err := token.Tokenize(os.Args[1])
 	if err != nil {
 		return err
 	}
 
-	fmt.Printf("  mov rax, %d\n", i)
+	{ // must start with Num
+		if t == nil {
+			return errors.New("No code given")
+		}
+		if t.Kind != token.Num {
+			return errors.New("Must start with numbers")
+		}
+		i, err := strconv.Atoi(t.Str)
+		if err != nil {
+			return err
+		}
+		fmt.Printf("  mov rax, %d\n", i)
+		t = t.Next
+	}
+
 	for {
-		if len(str) == 0 {
+		if t.Kind == token.Eof {
 			break
 		}
-		if str[0] == '+' {
-			str, i, err = strtoint(str[1:])
-			if err != nil {
-				return err
+
+		if t.Kind == token.Reserved {
+			if t.Str == "+" {
+				t = t.Next
+				i, err := strconv.Atoi(t.Str)
+				if err != nil {
+					return err
+				}
+				fmt.Printf("  add rax, %d\n", i)
+				t = t.Next
+				continue
 			}
-			fmt.Printf("  add rax, %d\n", i)
-			continue
+
+			if t.Str == "-" {
+				t = t.Next
+				i, err := strconv.Atoi(t.Str)
+				if err != nil {
+					return err
+				}
+				fmt.Printf("  sub rax, %d\n", i)
+				t = t.Next
+				continue
+			}
 		}
 
-		if str[0] == '-' {
-			str, i, err = strtoint(str[1:])
-			if err != nil {
-				return err
-			}
-			fmt.Printf("  sub rax, %d\n", i)
-			continue
-		}
-
-		return errors.New("Unexpected char")
+		return errors.New(fmt.Sprintf("Unexpected char: %q", t.Str))
 	}
 	fmt.Println("  ret")
 
 	return nil
-}
-
-func strtoint(str string) (string, int, error) {
-	cnt := 0
-	for _, char := range str {
-		if _, err := strconv.Atoi(string(char)); err == nil {
-			cnt++
-		} else {
-			break
-		}
-	}
-	i, err := strconv.Atoi(str[0:cnt])
-	return str[cnt:], i, err
 }
