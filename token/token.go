@@ -42,6 +42,11 @@ func Tokenize(str string) (*Token, error) {
 			break
 		}
 
+		if str[0] == ' ' {
+			str = str[1:]
+			continue
+		}
+
 		if str[0] == '+' || str[0] == '-' {
 			cur = cur.chain(Reserved, string(str[0]))
 			str = str[1:]
