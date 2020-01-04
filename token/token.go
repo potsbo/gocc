@@ -2,6 +2,8 @@ package token
 
 import (
 	"strconv"
+
+	"github.com/potsbo/gocc/util"
 )
 
 type Kind int
@@ -53,8 +55,8 @@ func Tokenize(str string) (*Token, error) {
 			continue
 		}
 
-		if isDigit(rune(str[0])) {
-			str, i, err = strtoint(str)
+		if util.IsDigit(rune(str[0])) {
+			str, i, err = util.Strtoint(str)
 			if err != nil {
 				return nil, err
 			}
@@ -63,29 +65,4 @@ func Tokenize(str string) (*Token, error) {
 	}
 
 	return head.Next, nil
-}
-
-func strtoint(str string) (string, int, error) {
-	cnt := 0
-	for _, char := range str {
-		if _, err := strconv.Atoi(string(char)); err == nil {
-			cnt++
-		} else {
-			break
-		}
-	}
-	i, err := strconv.Atoi(str[0:cnt])
-	return str[cnt:], i, err
-}
-
-func isDigit(c rune) bool {
-	digits := []rune{'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'}
-
-	for _, d := range digits {
-		if c == d {
-			return true
-		}
-	}
-
-	return false
 }
