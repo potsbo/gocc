@@ -26,10 +26,6 @@ type Processor struct {
 	token *Token
 }
 
-func (t *Processor) Token() *Token {
-	return t.token
-}
-
 func (t *Processor) Expect(op string) error {
 	cur := t.token
 	if cur.Kind != Reserved || cur.Str != op {

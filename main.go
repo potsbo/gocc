@@ -31,7 +31,7 @@ func compile() error {
 	}
 
 	{ // must start with Num
-		if proc.Token() == nil {
+		if proc.Finished() {
 			return errors.New("No code given")
 		}
 		i, err := proc.ExtractNum()
