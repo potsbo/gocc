@@ -18,7 +18,7 @@ const (
 
 type Token struct {
 	Kind Kind
-	Next *Token
+	next *Token
 	Str  string
 }
 
@@ -35,7 +35,7 @@ func (t *Processor) Expect(op string) error {
 	if cur.Kind != Reserved || cur.Str != op {
 		return errors.New("Unexpected Token")
 	}
-	t.token = cur.Next
+	t.token = cur.next
 	return nil
 }
 func (t *Processor) Finished() bool {
@@ -53,7 +53,7 @@ func (t *Processor) Consume(op string) bool {
 	if cur.Kind != Reserved || cur.Str != op {
 		return false
 	}
-	t.token = cur.Next
+	t.token = cur.next
 	return true
 }
 
@@ -62,7 +62,7 @@ func (t *Processor) ExtractNum() (int, error) {
 	if cur.Kind != Num {
 		return 0, errors.New("Unexpected Token")
 	}
-	t.token = cur.Next
+	t.token = cur.next
 
 	i, err := strconv.Atoi(cur.Str)
 	if err != nil {
@@ -74,11 +74,11 @@ func (t *Processor) ExtractNum() (int, error) {
 func (t *Token) chain(k Kind, s string) *Token {
 	n := Token{
 		Kind: k,
-		Next: nil,
+		next: nil,
 		Str:  s,
 	}
 
-	t.Next = &n
+	t.next = &n
 	return &n
 }
 
@@ -114,5 +114,5 @@ func Tokenize(str string) (*Processor, error) {
 		}
 	}
 
-	return &Processor{head.Next}, nil
+	return &Processor{head.next}, nil
 }
