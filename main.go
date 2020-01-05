@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"strconv"
 
 	"github.com/potsbo/gocc/token"
 )
@@ -43,37 +42,27 @@ func compile() error {
 		fmt.Printf("  mov rax, %d\n", i)
 	}
 
-	t := proc.Token()
 	for {
-		if t.Kind == token.Eof {
+		if proc.Finished() {
 			break
 		}
 
-		if t.Kind == token.Reserved {
-			if t.Str == "+" {
-				t = t.Next
-				i, err := strconv.Atoi(t.Str)
-				if err != nil {
-					return err
-				}
-				fmt.Printf("  add rax, %d\n", i)
-				t = t.Next
-				continue
+		if proc.Consume("+") {
+			i, err := proc.ExtractNum()
+			if err != nil {
+				return err
 			}
-
-			if t.Str == "-" {
-				t = t.Next
-				i, err := strconv.Atoi(t.Str)
-				if err != nil {
-					return err
-				}
-				fmt.Printf("  sub rax, %d\n", i)
-				t = t.Next
-				continue
-			}
+			fmt.Printf("  add rax, %d\n", i)
+			continue
 		}
-
-		return errors.New(fmt.Sprintf("Unexpected char: %q", t.Str))
+		if proc.Consume("-") {
+			i, err := proc.ExtractNum()
+			if err != nil {
+				return err
+			}
+			fmt.Printf("  sub rax, %d\n", i)
+			continue
+		}
 	}
 	fmt.Println("  ret")
 

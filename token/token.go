@@ -38,6 +38,24 @@ func (t *Processor) Expect(op string) error {
 	t.token = cur.Next
 	return nil
 }
+func (t *Processor) Finished() bool {
+	if t.token == nil {
+		return true
+	}
+	if t.token.Kind == Eof {
+		return true
+	}
+	return false
+}
+
+func (t *Processor) Consume(op string) bool {
+	cur := t.token
+	if cur.Kind != Reserved || cur.Str != op {
+		return false
+	}
+	t.token = cur.Next
+	return true
+}
 
 func (t *Processor) ExtractNum() (int, error) {
 	cur := t.token
