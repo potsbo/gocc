@@ -9,10 +9,6 @@ import (
 	"github.com/potsbo/gocc/token"
 )
 
-var (
-	debug = true
-)
-
 func main() {
 	err := compile()
 	if err != nil {
