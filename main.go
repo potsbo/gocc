@@ -26,26 +26,24 @@ func compile() error {
 	fmt.Println(".global _main")
 	fmt.Println("_main:")
 
-	t, err := token.Tokenize(os.Args[1])
+	proc, err := token.Tokenize(os.Args[1])
 	if err != nil {
 		return err
 	}
 
 	{ // must start with Num
-		if t == nil {
+		if proc.Token() == nil {
 			return errors.New("No code given")
 		}
-		if t.Kind != token.Num {
-			return errors.New("Must start with numbers")
-		}
-		i, err := strconv.Atoi(t.Str)
+		i, err := proc.ExtractNum()
 		if err != nil {
 			return err
 		}
+
 		fmt.Printf("  mov rax, %d\n", i)
-		t = t.Next
 	}
 
+	t := proc.Token()
 	for {
 		if t.Kind == token.Eof {
 			break

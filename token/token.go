@@ -1,6 +1,7 @@
 package token
 
 import (
+	"errors"
 	"strconv"
 
 	"github.com/potsbo/gocc/util"
@@ -21,6 +22,37 @@ type Token struct {
 	Str  string
 }
 
+type Processor struct {
+	token *Token
+}
+
+func (t *Processor) Token() *Token {
+	return t.token
+}
+
+func (t *Processor) Expect(op string) error {
+	cur := t.token
+	if cur.Kind != Reserved || cur.Str != op {
+		return errors.New("Unexpected Token")
+	}
+	t.token = cur.Next
+	return nil
+}
+
+func (t *Processor) ExtractNum() (int, error) {
+	cur := t.token
+	if cur.Kind != Num {
+		return 0, errors.New("Unexpected Token")
+	}
+	t.token = cur.Next
+
+	i, err := strconv.Atoi(cur.Str)
+	if err != nil {
+		return 0, err
+	}
+	return i, nil
+}
+
 func (t *Token) chain(k Kind, s string) *Token {
 	n := Token{
 		Kind: k,
@@ -32,7 +64,7 @@ func (t *Token) chain(k Kind, s string) *Token {
 	return &n
 }
 
-func Tokenize(str string) (*Token, error) {
+func Tokenize(str string) (*Processor, error) {
 	var head Token
 	cur := &head
 
@@ -64,5 +96,5 @@ func Tokenize(str string) (*Token, error) {
 		}
 	}
 
-	return head.Next, nil
+	return &Processor{head.Next}, nil
 }
