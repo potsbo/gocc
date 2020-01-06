@@ -71,14 +71,14 @@ func (p *Parser) expr() (*Node, error) {
 func (p *Parser) mul() (*Node, error) {
 	node, err := p.primary()
 	if err != nil {
-		return nil, err
+		return nil, fail.Wrap(err)
 	}
 
 	for {
 		if p.tokenProcessor.Consume("*") {
 			r, err := p.unary()
 			if err != nil {
-				return nil, err
+				return nil, fail.Wrap(err)
 			}
 			node = &Node{kind: Mul, lhs: node, rhs: r}
 			continue
@@ -87,7 +87,7 @@ func (p *Parser) mul() (*Node, error) {
 		if p.tokenProcessor.Consume("/") {
 			r, err := p.unary()
 			if err != nil {
-				return nil, err
+				return nil, fail.Wrap(err)
 			}
 			node = &Node{kind: Div, lhs: node, rhs: r}
 		}
