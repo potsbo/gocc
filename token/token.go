@@ -57,7 +57,7 @@ func (t *Processor) Consume(op string) bool {
 func (t *Processor) ExtractNum() (int, error) {
 	cur := t.token
 	if cur.Kind != Num {
-		return 0, fail.Errorf("Unexpected Token %q", t.token.Str)
+		return 0, fail.Errorf("Unexpected Token %q, expected a Num", t.token.Str)
 	}
 	t.token = cur.next
 
