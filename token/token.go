@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/potsbo/gocc/util"
+	"github.com/srvc/fail"
 )
 
 type Kind int
@@ -56,7 +57,7 @@ func (t *Processor) Consume(op string) bool {
 func (t *Processor) ExtractNum() (int, error) {
 	cur := t.token
 	if cur.Kind != Num {
-		return 0, errors.New("Unexpected Token")
+		return 0, fail.Errorf("Unexpected Token %q", t.token.Str)
 	}
 	t.token = cur.next
 

@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/potsbo/gocc/token"
+	"github.com/srvc/fail"
 )
 
 type Kind int
@@ -101,6 +102,13 @@ func (p *Parser) primary() (*Node, error) {
 			return nil, err
 		}
 		p.tokenProcessor.Expect(")")
+		if err != nil {
+			return nil, fail.Wrap(err)
+		}
+
+		if err != nil {
+			return nil, err
+		}
 		return node, nil
 	}
 
