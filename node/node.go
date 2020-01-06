@@ -75,7 +75,7 @@ func (p *Parser) mul() (*Node, error) {
 
 	for {
 		if p.tokenProcessor.Consume("*") {
-			r, err := p.primary()
+			r, err := p.unary()
 			if err != nil {
 				return nil, err
 			}
@@ -84,7 +84,7 @@ func (p *Parser) mul() (*Node, error) {
 		}
 
 		if p.tokenProcessor.Consume("/") {
-			r, err := p.primary()
+			r, err := p.unary()
 			if err != nil {
 				return nil, err
 			}
@@ -110,6 +110,21 @@ func (p *Parser) primary() (*Node, error) {
 		return nil, err
 	}
 	return newNodeNum(i), nil
+}
+
+func (p *Parser) unary() (*Node, error) {
+	if p.tokenProcessor.Consume("+") {
+		return p.primary()
+	}
+	if p.tokenProcessor.Consume("-") {
+		n, err := p.primary()
+		if err != nil {
+			return nil, err
+		}
+		return &Node{kind: Sub, lhs: newNodeNum(0), rhs: n}, nil
+	}
+
+	return p.primary()
 }
 
 func (p *Parser) Generate() (string, error) {
