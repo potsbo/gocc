@@ -101,14 +101,10 @@ func (p *Parser) primary() (*Node, error) {
 		if err != nil {
 			return nil, err
 		}
-		p.tokenProcessor.Expect(")")
-		if err != nil {
+		if err := p.tokenProcessor.Expect(")"); err != nil {
 			return nil, fail.Wrap(err)
 		}
 
-		if err != nil {
-			return nil, err
-		}
 		return node, nil
 	}
 
