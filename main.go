@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/potsbo/gocc/node"
 	"github.com/potsbo/gocc/token"
 )
 
@@ -29,41 +30,14 @@ func compile() error {
 	if err != nil {
 		return err
 	}
-
-	{ // must start with Num
-		if proc.Finished() {
-			return errors.New("No code given")
-		}
-		i, err := proc.ExtractNum()
-		if err != nil {
-			return err
-		}
-
-		fmt.Printf("  mov rax, %d\n", i)
+	p := node.NewParser(proc)
+	prog, err := p.Generate()
+	if err != nil {
+		return err
 	}
+	fmt.Println(prog)
 
-	for {
-		if proc.Finished() {
-			break
-		}
-
-		if proc.Consume("+") {
-			i, err := proc.ExtractNum()
-			if err != nil {
-				return err
-			}
-			fmt.Printf("  add rax, %d\n", i)
-			continue
-		}
-		if proc.Consume("-") {
-			i, err := proc.ExtractNum()
-			if err != nil {
-				return err
-			}
-			fmt.Printf("  sub rax, %d\n", i)
-			continue
-		}
-	}
+	fmt.Println("  pop rax")
 	fmt.Println("  ret")
 
 	return nil

@@ -1,6 +1,8 @@
 BIN := bin/gocc
-${BIN}: main.go token/token.go
-	go build -o $@ $<
+SRC=$(wildcard *.go) $(wildcard */*.go)
+
+${BIN}: ${SRC}
+	go build -o $@ .
 
 .PHONY: test
 test: ${BIN}

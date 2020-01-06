@@ -1,6 +1,11 @@
 package node
 
-import "github.com/potsbo/gocc/token"
+import (
+	"fmt"
+	"strings"
+
+	"github.com/potsbo/gocc/token"
+)
 
 type Kind int
 
@@ -105,4 +110,44 @@ func (p *Parser) primary() (*Node, error) {
 		return nil, err
 	}
 	return newNodeNum(i), nil
+}
+
+func (p *Parser) Generate() (string, error) {
+	node, err := p.expr()
+	if err != nil {
+		return "", err
+	}
+	return gen(node), nil
+}
+
+func gen(node *Node) string {
+	if node.kind == Num {
+		return fmt.Sprintf("  push %d", node.val)
+	}
+
+	lines := []string{
+		gen(node.lhs),
+		gen(node.rhs),
+		"  pop rdi",
+		"  pop rax",
+	}
+
+	switch node.kind {
+	case Add:
+		lines = append(lines, "  add rax, rdi")
+		break
+	case Sub:
+		lines = append(lines, "  sub rax, rdi")
+		break
+	case Mul:
+		lines = append(lines, "  imul rax, rdi")
+		break
+	case Div:
+		lines = append(lines, "  cqo")
+		lines = append(lines, "  idiv rdi")
+		break
+	}
+
+	lines = append(lines, "  push rax")
+	return strings.Join(lines, "\n")
 }
