@@ -69,7 +69,7 @@ func (p *Parser) expr() (*Node, error) {
 }
 
 func (p *Parser) mul() (*Node, error) {
-	node, err := p.primary()
+	node, err := p.unary()
 	if err != nil {
 		return nil, fail.Wrap(err)
 	}
