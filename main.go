@@ -31,16 +31,18 @@ func compile() error {
 	fmt.Println(".global _main")
 	fmt.Println("_main:")
 
-	proc, err := token.Tokenize(os.Args[1])
-	if err != nil {
-		return fail.Wrap(err)
+	{
+		proc, err := token.Tokenize(os.Args[1])
+		if err != nil {
+			return fail.Wrap(err)
+		}
+		p := node.NewParser(proc)
+		prog, err := p.Generate()
+		if err != nil {
+			return fail.Wrap(err)
+		}
+		fmt.Println(prog)
 	}
-	p := node.NewParser(proc)
-	prog, err := p.Generate()
-	if err != nil {
-		return fail.Wrap(err)
-	}
-	fmt.Println(prog)
 
 	fmt.Println("  pop rax")
 	fmt.Println("  ret")
