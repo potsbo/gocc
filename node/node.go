@@ -111,7 +111,7 @@ func (p *Parser) primary() (*Node, error) {
 	// そうでなければ数値のはず
 	i, err := p.tokenProcessor.ExtractNum()
 	if err != nil {
-		return nil, err
+		return nil, fail.Wrap(err)
 	}
 	return newNodeNum(i), nil
 }
