@@ -95,7 +95,7 @@ func Tokenize(str string) (*Processor, error) {
 			continue
 		}
 
-		if str[0] == '+' || str[0] == '-' {
+		if isReserved(rune(str[0])) {
 			cur = cur.chain(Reserved, string(str[0]))
 			str = str[1:]
 			continue
@@ -111,4 +111,14 @@ func Tokenize(str string) (*Processor, error) {
 	}
 
 	return &Processor{head.next}, nil
+}
+
+func isReserved(c rune) bool {
+	tokens := []rune("+-*/()")
+	for _, t := range tokens {
+		if t == c {
+			return true
+		}
+	}
+	return false
 }

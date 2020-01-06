@@ -2,7 +2,7 @@ BIN := bin/gocc
 SRC=$(wildcard *.go) $(wildcard */*.go)
 
 ${BIN}: ${SRC}
-	go build -o $@ .
+	go build -o $@ $<
 
 .PHONY: test
 test: ${BIN}
