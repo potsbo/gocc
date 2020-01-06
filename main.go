@@ -7,12 +7,17 @@ import (
 
 	"github.com/potsbo/gocc/node"
 	"github.com/potsbo/gocc/token"
+	"github.com/srvc/fail"
 )
 
 func main() {
 	err := compile()
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "%s\n", err.Error())
+		aerr := fail.Unwrap(err)
+		fmt.Fprintf(os.Stderr, "%s\n", aerr.Error())
+		for _, f := range aerr.StackTrace {
+			fmt.Fprintf(os.Stderr, "%s in %s:L%d\n", f.Func, f.File, f.Line)
+		}
 		os.Exit(1)
 	}
 }
@@ -28,12 +33,12 @@ func compile() error {
 
 	proc, err := token.Tokenize(os.Args[1])
 	if err != nil {
-		return err
+		return fail.Wrap(err)
 	}
 	p := node.NewParser(proc)
 	prog, err := p.Generate()
 	if err != nil {
-		return err
+		return fail.Wrap(err)
 	}
 	fmt.Println(prog)
 

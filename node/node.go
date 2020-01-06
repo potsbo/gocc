@@ -118,7 +118,11 @@ func (p *Parser) primary() (*Node, error) {
 
 func (p *Parser) unary() (*Node, error) {
 	if p.tokenProcessor.Consume("+") {
-		return p.primary()
+		n, err := p.primary()
+		if err != nil {
+			return nil, fail.Wrap(err)
+		}
+		return n, nil
 	}
 	if p.tokenProcessor.Consume("-") {
 		n, err := p.primary()
