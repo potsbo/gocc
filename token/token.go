@@ -3,6 +3,7 @@ package token
 import (
 	"errors"
 	"strconv"
+	"strings"
 
 	"github.com/potsbo/gocc/util"
 	"github.com/srvc/fail"
@@ -96,9 +97,9 @@ func Tokenize(str string) (*Processor, error) {
 			continue
 		}
 
-		if isReserved(rune(str[0])) {
-			cur = cur.chain(Reserved, string(str[0]))
-			str = str[1:]
+		if t := isReserved(str); t != "" {
+			cur = cur.chain(Reserved, t)
+			str = str[len(t):]
 			continue
 		}
 
@@ -114,12 +115,12 @@ func Tokenize(str string) (*Processor, error) {
 	return &Processor{head.next}, nil
 }
 
-func isReserved(c rune) bool {
-	tokens := []rune("+-*/()")
+func isReserved(str string) string {
+	tokens := []string{"+", "-", "*", "/", "(", ")"}
 	for _, t := range tokens {
-		if t == c {
-			return true
+		if strings.HasPrefix(str, t) {
+			return t
 		}
 	}
-	return false
+	return ""
 }
