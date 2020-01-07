@@ -63,7 +63,7 @@ func (t *Processor) ExtractNum() (int, error) {
 
 	i, err := strconv.Atoi(cur.Str)
 	if err != nil {
-		return 0, err
+		return 0, fail.Wrap(err)
 	}
 	return i, nil
 }
@@ -105,7 +105,7 @@ func Tokenize(str string) (*Processor, error) {
 		if util.IsDigit(rune(str[0])) {
 			str, i, err = util.Strtoint(str)
 			if err != nil {
-				return nil, err
+				return nil, fail.Wrap(err)
 			}
 			cur = cur.chain(Num, strconv.Itoa(i))
 		}
