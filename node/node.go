@@ -256,6 +256,10 @@ func gen(node *Node) (string, error) {
 		lines = append(lines, "  cqo")
 		lines = append(lines, "  idiv rdi")
 		break
+	case NotEqual:
+		lines = append(lines, "  cmp rax, rdi")
+		lines = append(lines, "  setne al")
+		lines = append(lines, "  movzx rax, al")
 	case Equal:
 		lines = append(lines, "  cmp rax, rdi")
 		lines = append(lines, "  sete al")
