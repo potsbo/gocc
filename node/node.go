@@ -260,6 +260,14 @@ func gen(node *Node) (string, error) {
 		lines = append(lines, "  cmp rax, rdi")
 		lines = append(lines, "  sete al")
 		lines = append(lines, "  movzx rax, al")
+	case SmallerThan:
+		lines = append(lines, "  cmp rax, rdi")
+		lines = append(lines, "  setl al")
+		lines = append(lines, "  movzx rax, al")
+	case GreaterThan:
+		lines = append(lines, "  cmp rdi, rax")
+		lines = append(lines, "  setl al")
+		lines = append(lines, "  movzx rax, al")
 	default:
 		return "", fail.Errorf("Token not supported %d", node.kind)
 	}
