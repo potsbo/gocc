@@ -109,7 +109,10 @@ func Tokenize(str string) (*Processor, error) {
 				return nil, fail.Wrap(err)
 			}
 			cur = cur.chain(Num, strconv.Itoa(i))
+			continue
 		}
+
+		return nil, fail.Errorf("No rule to parse %q", str)
 	}
 
 	return &Processor{head.next}, nil
