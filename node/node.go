@@ -258,8 +258,6 @@ func gen(node *Node) (string, error) {
 		lines = append(lines, "  idiv rdi")
 		break
 	case Equal:
-		lines = append(lines, "  pop rdi")
-		lines = append(lines, "  pop rax")
 		lines = append(lines, "  cmp rax, rdi")
 		lines = append(lines, "  sete al")
 		lines = append(lines, "  movzx rax, al")
