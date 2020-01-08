@@ -97,7 +97,6 @@ func (p *Parser) relational() (*Node, error) {
 			node = &Node{kind: GreaterThanOrEqualTo, lhs: node, rhs: r}
 			continue
 		}
-		return node, nil
 		if p.tokenProcessor.Consume("<") {
 			r, err := p.add()
 			if err != nil {
