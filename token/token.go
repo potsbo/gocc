@@ -116,7 +116,7 @@ func Tokenize(str string) (*Processor, error) {
 }
 
 func isReserved(str string) string {
-	tokens := []string{"+", "-", "*", "/", "(", ")"}
+	tokens := []string{"+", "-", "*", "/", "(", ")", "==", ">=", "<=", ">", "<"}
 	for _, t := range tokens {
 		if strings.HasPrefix(str, t) {
 			return t

@@ -17,6 +17,12 @@ const (
 	Mul
 	Div
 	Num
+	Equal
+	NotEqual
+	SmallerThanOrEqualTo
+	GreaterThanOrEqualTo
+	SmallerThan
+	GreaterThan
 )
 
 type Node struct {
@@ -41,7 +47,78 @@ func NewParser(t *token.Processor) Parser {
 	return Parser{tokenProcessor: t}
 }
 
-func (p *Parser) expr() (*Node, error) {
+func (p *Parser) equality() (*Node, error) {
+	node, err := p.relational()
+	if err != nil {
+		return nil, fail.Wrap(err)
+	}
+	for {
+		if p.tokenProcessor.Consume("==") {
+			r, err := p.relational()
+			if err != nil {
+				return nil, fail.Wrap(err)
+			}
+			node = &Node{kind: Equal, lhs: node, rhs: r}
+			continue
+		}
+
+		if p.tokenProcessor.Consume("!=") {
+			r, err := p.relational()
+			if err != nil {
+				return nil, fail.Wrap(err)
+			}
+			node = &Node{kind: NotEqual, lhs: node, rhs: r}
+			continue
+		}
+		return node, nil
+	}
+}
+
+func (p *Parser) relational() (*Node, error) {
+	node, err := p.add()
+	if err != nil {
+		return nil, err
+	}
+
+	for {
+		if p.tokenProcessor.Consume("<=") {
+			r, err := p.add()
+			if err != nil {
+				return nil, err
+			}
+			node = &Node{kind: SmallerThanOrEqualTo, lhs: node, rhs: r}
+			continue
+		}
+		if p.tokenProcessor.Consume(">=") {
+			r, err := p.add()
+			if err != nil {
+				return nil, err
+			}
+			node = &Node{kind: GreaterThanOrEqualTo, lhs: node, rhs: r}
+			continue
+		}
+		return node, nil
+		if p.tokenProcessor.Consume("<") {
+			r, err := p.add()
+			if err != nil {
+				return nil, err
+			}
+			node = &Node{kind: SmallerThan, lhs: node, rhs: r}
+			continue
+		}
+		if p.tokenProcessor.Consume(">") {
+			r, err := p.add()
+			if err != nil {
+				return nil, err
+			}
+			node = &Node{kind: GreaterThan, lhs: node, rhs: r}
+			continue
+		}
+		return node, nil
+	}
+}
+
+func (p *Parser) add() (*Node, error) {
 	node, err := p.mul()
 	if err != nil {
 		return nil, err
@@ -94,6 +171,9 @@ func (p *Parser) mul() (*Node, error) {
 		return node, nil
 	}
 }
+func (p *Parser) expr() (*Node, error) {
+	return p.equality()
+}
 
 func (p *Parser) primary() (*Node, error) {
 	if p.tokenProcessor.Consume("(") {
@@ -140,17 +220,25 @@ func (p *Parser) Generate() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return gen(node), nil
+	return gen(node)
 }
 
-func gen(node *Node) string {
+func gen(node *Node) (string, error) {
 	if node.kind == Num {
-		return fmt.Sprintf("  push %d", node.val)
+		return fmt.Sprintf("  push %d", node.val), nil
+	}
+
+	l, err := gen(node.lhs)
+	if err != nil {
+		return "", fail.Wrap(err)
+	}
+	r, err := gen(node.rhs)
+	if err != nil {
+		return "", fail.Wrap(err)
 	}
 
 	lines := []string{
-		gen(node.lhs),
-		gen(node.rhs),
+		l, r,
 		"  pop rdi",
 		"  pop rax",
 	}
@@ -169,8 +257,16 @@ func gen(node *Node) string {
 		lines = append(lines, "  cqo")
 		lines = append(lines, "  idiv rdi")
 		break
+	case Equal:
+		lines = append(lines, "  pop rdi")
+		lines = append(lines, "  pop rax")
+		lines = append(lines, "  cmp rax, rdi")
+		lines = append(lines, "  sete al")
+		lines = append(lines, "  movzx rax, al")
+	default:
+		return "", fail.Errorf("Token not supported %d", node.kind)
 	}
 
 	lines = append(lines, "  push rax")
-	return strings.Join(lines, "\n")
+	return strings.Join(lines, "\n"), nil
 }
