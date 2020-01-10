@@ -3,6 +3,7 @@ package token
 import (
 	"errors"
 	"strconv"
+	"regexp"
 	"strings"
 
 	"github.com/potsbo/gocc/util"
@@ -11,9 +12,14 @@ import (
 
 type Kind int
 
+var (
+	firstIdent = regexp.MustCompile(`([a-z]*)`).FindString
+)
+
 const (
 	_ Kind = iota
 	Reserved
+  Ident
 	Num
 	Eof
 )
@@ -112,10 +118,20 @@ func Tokenize(str string) (*Processor, error) {
 			continue
 		}
 
+    if t :=isIdent(str); t!=""{
+      cur = cur.chain(Ident, t)
+			str = str[len(t):]
+      continue
+    }
+
 		return nil, fail.Errorf("No rule to parse %q", str)
 	}
 
 	return &Processor{head.next}, nil
+}
+
+func isIdent(str string) string {
+  return firstIdent(str)
 }
 
 func isReserved(str string) string {
