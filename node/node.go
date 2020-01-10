@@ -23,6 +23,7 @@ const (
 	GreaterThanOrEqualTo
 	SmallerThan
 	GreaterThan
+  LVar
 )
 
 type Node struct {
@@ -30,6 +31,7 @@ type Node struct {
 	lhs  *Node // 左辺
 	rhs  *Node // 右辺
 	val  int   // kindがND_NUMの場合のみ使う
+  offset int// kindがND_LVARの場合のみ使う
 }
 
 func newNodeNum(n int) *Node {
@@ -181,11 +183,20 @@ func (p *Parser) primary() (*Node, error) {
 			return nil, err
 		}
 		if err := p.tokenProcessor.Expect(")"); err != nil {
-			return nil, fail.Wrap(err)
+      return nil, fail.Wrap(err)
 		}
 
 		return node, nil
 	}
+
+  if p.tokenProcessor.NextKind() == token.Ident{
+    firstChar := rune(p.tokenProcessor.NextStr()[0])
+    of := offset(firstChar)
+    if of < 0 {
+      return nil, fail.Errorf("Unexpected offset %d", of)
+    }
+    return &Node{kind: LVar, offset: of}, nil
+  }
 
 	// そうでなければ数値のはず
 	i, err := p.tokenProcessor.ExtractNum()
@@ -193,6 +204,16 @@ func (p *Parser) primary() (*Node, error) {
 		return nil, fail.Wrap(err)
 	}
 	return newNodeNum(i), nil
+}
+
+func offset(c rune) int {
+	chars := []rune{'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'}
+  for i, v := range chars {
+    if c == v {
+      return i + 1
+    }
+  }
+  return -1
 }
 
 func (p *Parser) unary() (*Node, error) {

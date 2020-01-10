@@ -75,6 +75,20 @@ func (t *Processor) ExtractNum() (int, error) {
 	return i, nil
 }
 
+func (t *Processor) NextKind() Kind {
+  if t.token == nil {
+    return 0
+  }
+  return t.token.Kind
+}
+
+func (t *Processor) NextStr() string {
+  if t.token == nil {
+    return ""
+  }
+  return t.token.Str
+}
+
 func (t *Token) chain(k Kind, s string) *Token {
 	n := Token{
 		Kind: k,
