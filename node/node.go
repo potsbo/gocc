@@ -24,6 +24,7 @@ const (
 	SmallerThan
 	GreaterThan
 	LVar
+	Assign
 )
 
 type Node struct {
@@ -173,7 +174,7 @@ func (p *Parser) mul() (*Node, error) {
 	}
 }
 func (p *Parser) expr() (*Node, error) {
-	return p.equality()
+	return p.assign()
 }
 
 func (p *Parser) primary() (*Node, error) {
@@ -214,6 +215,22 @@ func offset(c rune) int {
 		}
 	}
 	return -1
+}
+
+func (p *Parser) assign() (*Node, error) {
+	n, err := p.equality()
+	if err != nil {
+		return nil, fail.Wrap(err)
+	}
+	if p.tokenProcessor.Consume("=") {
+		r, err := p.assign()
+		if err != nil {
+			return nil, fail.Wrap(err)
+		}
+		return &Node{kind: Assign, lhs: n, rhs: r}, nil
+	}
+
+	return n, nil
 }
 
 func (p *Parser) unary() (*Node, error) {
