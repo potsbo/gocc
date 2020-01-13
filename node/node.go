@@ -173,6 +173,18 @@ func (p *Parser) mul() (*Node, error) {
 		return node, nil
 	}
 }
+
+func (p *Parser) stmt() (*Node, error) {
+	n, err := p.expr()
+	if err != nil {
+		return nil, fail.Wrap(err)
+	}
+	if err := p.tokenProcessor.Expect(";"); err != nil {
+		return nil, fail.Wrap(err)
+	}
+	return n, nil
+}
+
 func (p *Parser) expr() (*Node, error) {
 	return p.assign()
 }
