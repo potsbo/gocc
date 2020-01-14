@@ -174,6 +174,21 @@ func (p *Parser) mul() (*Node, error) {
 	}
 }
 
+func (p *Parser) program() ([]*Node, error) {
+	stmts := []*Node{}
+	for {
+		if p.tokenProcessor.Finished() {
+			break
+		}
+		n, err := p.stmt()
+		if err != nil {
+			return nil, fail.Wrap(err)
+		}
+		stmts = append(stmts, n)
+	}
+	return stmts, nil
+}
+
 func (p *Parser) stmt() (*Node, error) {
 	n, err := p.expr()
 	if err != nil {
