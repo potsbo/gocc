@@ -287,6 +287,20 @@ func (p *Parser) Generate() (string, error) {
 	return gen(node)
 }
 
+func gen_lvar(node *Node) (string, error) {
+	if node.kind != LVar {
+		return "", fail.Errorf("Unexpected kind %d, expected %d", node.kind, LVar)
+	}
+
+	lines := []string{
+		fmt.Sprintf("  mov rax, rbp"),
+		fmt.Sprintf("  sub rax, %d", node.offset),
+		fmt.Sprintf("  push rax"),
+	}
+
+	return strings.Join(lines, "\n"), nil
+}
+
 func gen(node *Node) (string, error) {
 	if node.kind == Num {
 		return fmt.Sprintf("  push %d", node.val), nil
