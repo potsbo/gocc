@@ -305,6 +305,35 @@ func gen(node *Node) (string, error) {
 	if node.kind == Num {
 		return fmt.Sprintf("  push %d", node.val), nil
 	}
+	if node.kind == LVar {
+		gen_lvar(node)
+		lines := []string{
+			fmt.Sprintf("  pop rax"),
+			fmt.Sprintf("  mov rax, [rax]"),
+			fmt.Sprintf("  push rax"),
+		}
+		return strings.Join(lines, "\n"), nil
+	}
+	if node.kind == Assign {
+		l, err := gen_lvar(node.lhs)
+		if err != nil {
+			return "", fail.Wrap(err)
+		}
+		r, err := gen(node.rhs)
+		if err != nil {
+			return "", fail.Wrap(err)
+		}
+
+		lines := []string{
+			l, r,
+			"  pop rdi",
+			"  pop rax",
+			"  mov [rax], rdi",
+			"  push rdi",
+		}
+
+		return strings.Join(lines, "\n"), nil
+	}
 
 	l, err := gen(node.lhs)
 	if err != nil {
