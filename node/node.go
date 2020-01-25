@@ -297,7 +297,7 @@ func (p *Parser) Generate() (string, error) {
 	return strings.Join(programs, "\n"), nil
 }
 
-func gen_lvar(node *Node) (string, error) {
+func gen_lval(node *Node) (string, error) {
 	if node.kind != LVar {
 		return "", fail.Errorf("Unexpected kind %d, expected %d", node.kind, LVar)
 	}
@@ -316,7 +316,7 @@ func gen(node *Node) (string, error) {
 		return fmt.Sprintf("  push %d", node.val), nil
 	}
 	if node.kind == LVar {
-		gen_lvar(node)
+		gen_lval(node)
 		lines := []string{
 			fmt.Sprintf("  pop rax"),
 			fmt.Sprintf("  mov rax, [rax]"),
@@ -325,7 +325,7 @@ func gen(node *Node) (string, error) {
 		return strings.Join(lines, "\n"), nil
 	}
 	if node.kind == Assign {
-		l, err := gen_lvar(node.lhs)
+		l, err := gen_lval(node.lhs)
 		if err != nil {
 			return "", fail.Wrap(err)
 		}
