@@ -1,9 +1,8 @@
 package token
 
 import (
-	"errors"
-	"strconv"
 	"regexp"
+	"strconv"
 	"strings"
 
 	"github.com/potsbo/gocc/util"
@@ -19,10 +18,25 @@ var (
 const (
 	_ Kind = iota
 	Reserved
-  Ident
+	Ident
 	Num
 	Eof
 )
+
+func (k Kind) String() string {
+	switch k {
+	case Reserved:
+		return "Reserved"
+	case Ident:
+		return "Ident"
+	case Num:
+		return "Num"
+	case Eof:
+		return "Eof"
+	default:
+		return "Unknown"
+	}
+}
 
 type Token struct {
 	Kind Kind
@@ -37,7 +51,7 @@ type Processor struct {
 func (t *Processor) Expect(op string) error {
 	cur := t.token
 	if cur.Kind != Reserved || cur.Str != op {
-		return errors.New("Unexpected Token")
+		return fail.Errorf("Unexpected token kind %q, expected %q, %q", cur.Kind.String(), Reserved.String(), op)
 	}
 	t.token = cur.next
 	return nil
@@ -76,17 +90,17 @@ func (t *Processor) ExtractNum() (int, error) {
 }
 
 func (t *Processor) NextKind() Kind {
-  if t.token == nil {
-    return 0
-  }
-  return t.token.Kind
+	if t.token == nil {
+		return 0
+	}
+	return t.token.Kind
 }
 
 func (t *Processor) NextStr() string {
-  if t.token == nil {
-    return ""
-  }
-  return t.token.Str
+	if t.token == nil {
+		return ""
+	}
+	return t.token.Str
 }
 
 func (t *Token) chain(k Kind, s string) *Token {
@@ -132,11 +146,11 @@ func Tokenize(str string) (*Processor, error) {
 			continue
 		}
 
-    if t :=isIdent(str); t!=""{
-      cur = cur.chain(Ident, t)
+		if t := isIdent(str); t != "" {
+			cur = cur.chain(Ident, t)
 			str = str[len(t):]
-      continue
-    }
+			continue
+		}
 
 		return nil, fail.Errorf("No rule to parse %q", str)
 	}
@@ -145,7 +159,7 @@ func Tokenize(str string) (*Processor, error) {
 }
 
 func isIdent(str string) string {
-  return firstIdent(str)
+	return firstIdent(str)
 }
 
 func isReserved(str string) string {
