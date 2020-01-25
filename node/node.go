@@ -280,11 +280,21 @@ func (p *Parser) unary() (*Node, error) {
 }
 
 func (p *Parser) Generate() (string, error) {
-	node, err := p.expr()
+	nodes, err := p.program()
 	if err != nil {
 		return "", err
 	}
-	return gen(node)
+
+	programs := []string{}
+	for _, node := range nodes {
+		str, err := gen(node)
+		if err != nil {
+			return "", fail.Wrap(err)
+		}
+		programs = append(programs, str)
+	}
+
+	return strings.Join(programs, "\n"), nil
 }
 
 func gen_lvar(node *Node) (string, error) {
