@@ -343,8 +343,10 @@ func gen(node *Node) (string, error) {
 		lines := []string{
 			"# assign",
 			l, r,
+			"## pop from stack",
 			"  pop rdi",
 			"  pop rax",
+			"## assign",
 			"  mov [rax], rdi",
 			"  push rdi",
 		}
