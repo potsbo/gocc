@@ -1,6 +1,7 @@
 package token
 
 import (
+	"fmt"
 	"regexp"
 	"strconv"
 	"strings"
@@ -44,6 +45,10 @@ type Token struct {
 	Str  string
 }
 
+func (t Token) String() string {
+	return fmt.Sprintf("%q, type: %s", t.Str, t.Kind.String())
+}
+
 type Processor struct {
 	token *Token
 }
@@ -55,6 +60,20 @@ func (t *Processor) Expect(op string) error {
 	}
 	t.token = cur.next
 	return nil
+}
+
+func (t *Processor) Inspect() []Token {
+	cur := t.token
+	tokens := []Token{}
+	for {
+		if cur == nil {
+			break
+		}
+
+		tokens = append(tokens, *cur)
+		cur = cur.next
+	}
+	return tokens
 }
 func (t *Processor) Finished() bool {
 	if t.token == nil {
@@ -163,7 +182,7 @@ func isIdent(str string) string {
 }
 
 func isReserved(str string) string {
-	tokens := []string{"+", "-", "*", "/", "(", ")", "==", ">=", "<=", ">", "<", "!=", ";"}
+	tokens := []string{"+", "-", "*", "/", "(", ")", "==", ">=", "<=", ">", "<", "!=", ";", "="}
 	for _, t := range tokens {
 		if strings.HasPrefix(str, t) {
 			return t
