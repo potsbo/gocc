@@ -44,7 +44,7 @@ func compile() error {
 	fmt.Println("_main:")
 
 	fmt.Println("# prologue")
-	fmt.Println("  push 1")
+	fmt.Println("  push rbp")
 	fmt.Println("  mov rbp, rsp")
 	fmt.Println("  sub rsp, 208") // 26 * 8
 	fmt.Println("# prologue end")
