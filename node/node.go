@@ -314,7 +314,7 @@ func gen_lval(node *Node) (string, error) {
 
 func gen(node *Node) (string, error) {
 	if node.kind == Num {
-		return fmt.Sprintf("  push %d", node.val), nil
+		return fmt.Sprintf("# Num\n  push %d", node.val), nil
 	}
 	if node.kind == LVar {
 		l, err := gen_lval(node)
@@ -322,6 +322,7 @@ func gen(node *Node) (string, error) {
 			return "", fail.Wrap(err)
 		}
 		lines := []string{
+			"# LVar",
 			l,
 			fmt.Sprintf("  pop rax"),
 			fmt.Sprintf("  mov rax, [rax]"),
