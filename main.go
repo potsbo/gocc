@@ -43,6 +43,12 @@ func compile() error {
 	fmt.Println(".global _main")
 	fmt.Println("_main:")
 
+	fmt.Println("# prologue")
+	fmt.Println("  push 1")
+	fmt.Println("  mov rbp, rsp")
+	fmt.Println("  sub rsp, 208") // 26 * 8
+	fmt.Println("# prologue end")
+
 	{
 		proc, err := token.Tokenize(os.Args[1])
 		if err != nil {
@@ -57,11 +63,14 @@ func compile() error {
 			return fail.Wrap(err)
 		}
 		fmt.Println(prog)
+		fmt.Println("  pop rax")
 	}
 
-	fmt.Println("# end")
-	fmt.Println("  pop rax")
+	fmt.Println("# epilogue")
+	fmt.Println("  mov rsp, rbp")
+	fmt.Println("  pop rbp")
 	fmt.Println("  ret")
+	fmt.Println("# epilogue end")
 
 	return nil
 }
