@@ -303,6 +303,7 @@ func gen_lval(node *Node) (string, error) {
 	}
 
 	lines := []string{
+		"# gen_lvar",
 		fmt.Sprintf("  mov rax, rbp"),
 		fmt.Sprintf("  sub rax, %d", node.offset),
 		fmt.Sprintf("  push rax"),
