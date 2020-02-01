@@ -217,8 +217,8 @@ func (p *Parser) primary() (*Node, error) {
 		return node, nil
 	}
 
-	if p.tokenProcessor.NextKind() == token.Ident {
-		firstChar := rune(p.tokenProcessor.NextStr()[0])
+	if str, ok := p.tokenProcessor.ConsumeIdent(); ok {
+		firstChar := rune(str[0])
 		of := offset(firstChar)
 		if of < 0 {
 			return nil, fail.Errorf("Unexpected offset %d", of)

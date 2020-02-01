@@ -85,6 +85,16 @@ func (t *Processor) Finished() bool {
 	return false
 }
 
+func (t *Processor) ConsumeIdent() (string, bool) {
+	cur := t.token
+	if cur.Kind != Ident {
+		return "", false
+	}
+	str := cur.Str
+	t.token = cur.next
+	return str, true
+}
+
 func (t *Processor) Consume(op string) bool {
 	cur := t.token
 	if cur.Kind != Reserved || cur.Str != op {
