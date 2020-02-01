@@ -238,7 +238,7 @@ func offset(c rune) int {
 	chars := []rune{'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'}
 	for i, v := range chars {
 		if c == v {
-			return i + 1
+			return (i + 1) * 8
 		}
 	}
 	return -1
@@ -317,8 +317,12 @@ func gen(node *Node) (string, error) {
 		return fmt.Sprintf("  push %d", node.val), nil
 	}
 	if node.kind == LVar {
-		gen_lval(node)
+		l, err := gen_lval(node)
+		if err != nil {
+			return "", fail.Wrap(err)
+		}
 		lines := []string{
+			l,
 			fmt.Sprintf("  pop rax"),
 			fmt.Sprintf("  mov rax, [rax]"),
 			fmt.Sprintf("  push rax"),
@@ -336,6 +340,7 @@ func gen(node *Node) (string, error) {
 		}
 
 		lines := []string{
+			"# assign",
 			l, r,
 			"  pop rdi",
 			"  pop rax",
@@ -356,6 +361,7 @@ func gen(node *Node) (string, error) {
 	}
 
 	lines := []string{
+		"# gen",
 		l, r,
 		"  pop rdi",
 		"  pop rax",
@@ -363,39 +369,49 @@ func gen(node *Node) (string, error) {
 
 	switch node.kind {
 	case Add:
+		lines = append(lines, "# Add")
 		lines = append(lines, "  add rax, rdi")
 		break
 	case Sub:
+		lines = append(lines, "# Sub")
 		lines = append(lines, "  sub rax, rdi")
 		break
 	case Mul:
+		lines = append(lines, "# Mul")
 		lines = append(lines, "  imul rax, rdi")
 		break
 	case Div:
+		lines = append(lines, "# Div")
 		lines = append(lines, "  cqo")
 		lines = append(lines, "  idiv rdi")
 		break
 	case NotEqual:
+		lines = append(lines, "# NotEqual")
 		lines = append(lines, "  cmp rax, rdi")
 		lines = append(lines, "  setne al")
 		lines = append(lines, "  movzx rax, al")
 	case Equal:
+		lines = append(lines, "# Equal")
 		lines = append(lines, "  cmp rax, rdi")
 		lines = append(lines, "  sete al")
 		lines = append(lines, "  movzx rax, al")
 	case SmallerThan:
+		lines = append(lines, "# SmallerThan")
 		lines = append(lines, "  cmp rax, rdi")
 		lines = append(lines, "  setl al")
 		lines = append(lines, "  movzx rax, al")
 	case GreaterThan:
+		lines = append(lines, "# GreaterThan")
 		lines = append(lines, "  cmp rdi, rax")
 		lines = append(lines, "  setl al")
 		lines = append(lines, "  movzx rax, al")
 	case SmallerThanOrEqualTo:
+		lines = append(lines, "# SmallerThanOrEqualTo")
 		lines = append(lines, "  cmp rax, rdi")
 		lines = append(lines, "  setle al")
 		lines = append(lines, "  movzx rax, al")
 	case GreaterThanOrEqualTo:
+		lines = append(lines, "# GreaterThanOrEqualTo")
 		lines = append(lines, "  cmp rdi, rax")
 		lines = append(lines, "  setle al")
 		lines = append(lines, "  movzx rax, al")

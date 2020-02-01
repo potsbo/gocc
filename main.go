@@ -59,6 +59,7 @@ func compile() error {
 		fmt.Println(prog)
 	}
 
+	fmt.Println("# end")
 	fmt.Println("  pop rax")
 	fmt.Println("  ret")
 
