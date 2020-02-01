@@ -364,6 +364,7 @@ func gen(node *Node) (string, error) {
 	lines := []string{
 		"# gen",
 		l, r,
+		"# pop from stack",
 		"  pop rdi",
 		"  pop rax",
 	}
