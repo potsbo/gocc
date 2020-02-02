@@ -303,10 +303,11 @@ func gen_lval(node *Node) (string, error) {
 	}
 
 	lines := []string{
-		"# gen_lvar",
+		"## push var pointer",
 		fmt.Sprintf("  mov rax, rbp"),
 		fmt.Sprintf("  sub rax, %d", node.offset),
 		fmt.Sprintf("  push rax"),
+		"## end",
 	}
 
 	return strings.Join(lines, "\n"), nil
@@ -324,6 +325,7 @@ func gen(node *Node) (string, error) {
 		lines := []string{
 			"# LVar",
 			l,
+			"## pushing the var value with following pointer",
 			fmt.Sprintf("  pop rax"),
 			fmt.Sprintf("  mov rax, [rax]"),
 			fmt.Sprintf("  push rax"),
