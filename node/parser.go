@@ -183,6 +183,7 @@ func (p *Parser) primary() (*Node, error) {
 	}
 
 	if str, ok := p.tokenProcessor.ConsumeIdent(); ok {
+		firstChar := rune(str[0])
 		of := p.offset(firstChar)
 		if of < 0 {
 			return nil, fail.Errorf("Unexpected offset %d", of)
