@@ -13,7 +13,7 @@ type Parser struct {
 }
 
 type lvar struct {
-	str string
+	str    string
 	offset int
 }
 
@@ -27,7 +27,7 @@ func (p *Parser) equality() (*Node, error) {
 		return nil, fail.Wrap(err)
 	}
 	for {
-		if p.tokenProcessor.Consume("==") {
+		if p.tokenProcessor.ConsumeReserved("==") {
 			r, err := p.relational()
 			if err != nil {
 				return nil, fail.Wrap(err)
@@ -36,7 +36,7 @@ func (p *Parser) equality() (*Node, error) {
 			continue
 		}
 
-		if p.tokenProcessor.Consume("!=") {
+		if p.tokenProcessor.ConsumeReserved("!=") {
 			r, err := p.relational()
 			if err != nil {
 				return nil, fail.Wrap(err)
@@ -55,7 +55,7 @@ func (p *Parser) relational() (*Node, error) {
 	}
 
 	for {
-		if p.tokenProcessor.Consume("<=") {
+		if p.tokenProcessor.ConsumeReserved("<=") {
 			r, err := p.add()
 			if err != nil {
 				return nil, err
@@ -63,7 +63,7 @@ func (p *Parser) relational() (*Node, error) {
 			node = &Node{kind: SmallerThanOrEqualTo, lhs: node, rhs: r}
 			continue
 		}
-		if p.tokenProcessor.Consume(">=") {
+		if p.tokenProcessor.ConsumeReserved(">=") {
 			r, err := p.add()
 			if err != nil {
 				return nil, err
@@ -71,7 +71,7 @@ func (p *Parser) relational() (*Node, error) {
 			node = &Node{kind: GreaterThanOrEqualTo, lhs: node, rhs: r}
 			continue
 		}
-		if p.tokenProcessor.Consume("<") {
+		if p.tokenProcessor.ConsumeReserved("<") {
 			r, err := p.add()
 			if err != nil {
 				return nil, err
@@ -79,7 +79,7 @@ func (p *Parser) relational() (*Node, error) {
 			node = &Node{kind: SmallerThan, lhs: node, rhs: r}
 			continue
 		}
-		if p.tokenProcessor.Consume(">") {
+		if p.tokenProcessor.ConsumeReserved(">") {
 			r, err := p.add()
 			if err != nil {
 				return nil, err
@@ -98,7 +98,7 @@ func (p *Parser) add() (*Node, error) {
 	}
 
 	for {
-		if p.tokenProcessor.Consume("+") {
+		if p.tokenProcessor.ConsumeReserved("+") {
 			r, err := p.mul()
 			if err != nil {
 				return nil, err
@@ -106,7 +106,7 @@ func (p *Parser) add() (*Node, error) {
 			node = &Node{kind: Add, lhs: node, rhs: r}
 			continue
 		}
-		if p.tokenProcessor.Consume("-") {
+		if p.tokenProcessor.ConsumeReserved("-") {
 			r, err := p.mul()
 			if err != nil {
 				return nil, err
@@ -125,7 +125,7 @@ func (p *Parser) mul() (*Node, error) {
 	}
 
 	for {
-		if p.tokenProcessor.Consume("*") {
+		if p.tokenProcessor.ConsumeReserved("*") {
 			r, err := p.unary()
 			if err != nil {
 				return nil, fail.Wrap(err)
@@ -134,7 +134,7 @@ func (p *Parser) mul() (*Node, error) {
 			continue
 		}
 
-		if p.tokenProcessor.Consume("/") {
+		if p.tokenProcessor.ConsumeReserved("/") {
 			r, err := p.unary()
 			if err != nil {
 				return nil, fail.Wrap(err)
@@ -161,9 +161,19 @@ func (p *Parser) program() ([]*Node, error) {
 }
 
 func (p *Parser) stmt() (*Node, error) {
-	n, err := p.expr()
-	if err != nil {
-		return nil, fail.Wrap(err)
+	var n *Node
+	if p.tokenProcessor.ConsumeReturn() {
+		l, err := p.expr()
+		if err != nil {
+			return nil, fail.Wrap(err)
+		}
+		n = &Node{kind: Return, lhs: l}
+	} else {
+		var err error
+		n, err = p.expr()
+		if err != nil {
+			return nil, fail.Wrap(err)
+		}
 	}
 	if err := p.tokenProcessor.Expect(";"); err != nil {
 		return nil, fail.Wrap(err)
@@ -176,7 +186,7 @@ func (p *Parser) expr() (*Node, error) {
 }
 
 func (p *Parser) primary() (*Node, error) {
-	if p.tokenProcessor.Consume("(") {
+	if p.tokenProcessor.ConsumeReserved("(") {
 		node, err := p.expr()
 		if err != nil {
 			return nil, err
@@ -221,7 +231,7 @@ func (p *Parser) assign() (*Node, error) {
 	if err != nil {
 		return nil, fail.Wrap(err)
 	}
-	if p.tokenProcessor.Consume("=") {
+	if p.tokenProcessor.ConsumeReserved("=") {
 		r, err := p.assign()
 		if err != nil {
 			return nil, fail.Wrap(err)
@@ -233,14 +243,14 @@ func (p *Parser) assign() (*Node, error) {
 }
 
 func (p *Parser) unary() (*Node, error) {
-	if p.tokenProcessor.Consume("+") {
+	if p.tokenProcessor.ConsumeReserved("+") {
 		n, err := p.primary()
 		if err != nil {
 			return nil, fail.Wrap(err)
 		}
 		return n, nil
 	}
-	if p.tokenProcessor.Consume("-") {
+	if p.tokenProcessor.ConsumeReserved("-") {
 		n, err := p.primary()
 		if err != nil {
 			return nil, err

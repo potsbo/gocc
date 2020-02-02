@@ -24,6 +24,7 @@ const (
 	GreaterThan
 	LVar
 	Assign
+	Return
 )
 
 type Node struct {
@@ -58,6 +59,25 @@ func gen_lval(node *Node) (string, error) {
 }
 
 func gen(node *Node) (string, error) {
+	if node == nil {
+		return "", nil
+	}
+	if node.kind == Return {
+		l, err := gen(node.lhs)
+		if err != nil {
+			return "", fail.Wrap(err)
+		}
+		lines := []string{
+			l,
+			"# epilogue",
+			"  pop rax",
+			"  mov rsp, rbp",
+			"  pop rbp",
+			"  ret",
+			"# epilogue end",
+		}
+		return strings.Join(lines, "\n"), nil
+	}
 	if node.kind == Num {
 		return fmt.Sprintf("# Num\n  push %d", node.val), nil
 	}

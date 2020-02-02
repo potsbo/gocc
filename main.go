@@ -66,11 +66,5 @@ func compile() error {
 		fmt.Println("  pop rax")
 	}
 
-	fmt.Println("# epilogue")
-	fmt.Println("  mov rsp, rbp")
-	fmt.Println("  pop rbp")
-	fmt.Println("  ret")
-	fmt.Println("# epilogue end")
-
 	return nil
 }

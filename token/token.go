@@ -14,6 +14,7 @@ type Kind int
 
 var (
 	firstIdent = regexp.MustCompile(`([a-z]*)`).FindString
+	alnum      = regexp.MustCompile(`^([a-z]|[A-Z]|[0-9]|_)*`).FindString
 )
 
 const (
@@ -59,7 +60,7 @@ type Processor struct {
 func (t *Processor) Expect(op string) error {
 	cur := t.token
 	if cur.Kind != Reserved || cur.Str != op {
-		return fail.Errorf("Unexpected token kind %q, expected %q, %q", cur.Kind.String(), Reserved.String(), op)
+		return fail.Errorf("Unexpected token %q, %q, expected %q, %q", cur.Kind.String(), cur.Str, Reserved.String(), op)
 	}
 	t.token = cur.next
 	return nil
@@ -88,8 +89,23 @@ func (t *Processor) Finished() bool {
 	return false
 }
 
+func (t *Processor) ConsumeReturn() bool {
+	cur := t.token
+	if cur == nil {
+		return false
+	}
+	if cur.Kind != Return {
+		return false
+	}
+	t.token = cur.next
+	return true
+}
+
 func (t *Processor) ConsumeIdent() (string, bool) {
 	cur := t.token
+	if cur == nil {
+		return "", false
+	}
 	if cur.Kind != Ident {
 		return "", false
 	}
@@ -98,8 +114,11 @@ func (t *Processor) ConsumeIdent() (string, bool) {
 	return str, true
 }
 
-func (t *Processor) Consume(op string) bool {
+func (t *Processor) ConsumeReserved(op string) bool {
 	cur := t.token
+	if cur == nil {
+		return false
+	}
 	if cur.Kind != Reserved || cur.Str != op {
 		return false
 	}
@@ -109,6 +128,9 @@ func (t *Processor) Consume(op string) bool {
 
 func (t *Processor) ExtractNum() (int, error) {
 	cur := t.token
+	if cur == nil {
+		return 0, fail.Errorf("Current token is nil")
+	}
 	if cur.Kind != Num {
 		return 0, fail.Errorf("Unexpected Token %q, expected a Num", t.token.Str)
 	}
@@ -156,7 +178,7 @@ func Tokenize(str string) (*Processor, error) {
 		if v := isReturn(str); v != "" {
 			cur = cur.chain(Return, v)
 			str = str[len(v):]
-			break
+			continue
 		}
 		if len(str) == 0 {
 			cur = cur.chain(Eof, "")
@@ -196,8 +218,12 @@ func Tokenize(str string) (*Processor, error) {
 }
 
 func isReturn(str string) string {
-	if strings.HasPrefix(str, "return") {
-		return "return"
+	target := "return"
+	nextStr := strings.TrimPrefix(str, target)
+	matched := alnum(nextStr)
+
+	if strings.HasPrefix(str, target) && matched == "" {
+		return target
 	}
 	return ""
 }
