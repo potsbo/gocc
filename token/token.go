@@ -20,6 +20,8 @@ var (
 const (
 	_ Kind = iota
 	Return
+	If
+	Else
 	Reserved
 	Ident
 	Num
@@ -28,6 +30,10 @@ const (
 
 func (k Kind) String() string {
 	switch k {
+	case If:
+		return "If"
+	case Else:
+		return "Else"
 	case Return:
 		return "Return"
 	case Reserved:
@@ -87,6 +93,18 @@ func (t *Processor) Finished() bool {
 		return true
 	}
 	return false
+}
+
+func (t *Processor) ConsumeKind(k Kind) *Token {
+	cur := t.token
+	if cur == nil {
+		return nil
+	}
+	if cur.Kind != k {
+		return nil
+	}
+	t.token = cur.next
+	return cur
 }
 
 func (t *Processor) ConsumeReturn() bool {
@@ -175,14 +193,19 @@ func Tokenize(str string) (*Processor, error) {
 	for {
 		var i int
 		var err error
+		if len(str) == 0 {
+			cur = cur.chain(Eof, "")
+			break
+		}
 		if v := isReturn(str); v != "" {
 			cur = cur.chain(Return, v)
 			str = str[len(v):]
 			continue
 		}
-		if len(str) == 0 {
-			cur = cur.chain(Eof, "")
-			break
+		if v := isIf(str); v != "" {
+			cur = cur.chain(If, v)
+			str = str[len(v):]
+			continue
 		}
 
 		if str[0] == ' ' {
@@ -219,6 +242,16 @@ func Tokenize(str string) (*Processor, error) {
 
 func isReturn(str string) string {
 	target := "return"
+	nextStr := strings.TrimPrefix(str, target)
+	matched := alnum(nextStr)
+
+	if strings.HasPrefix(str, target) && matched == "" {
+		return target
+	}
+	return ""
+}
+func isIf(str string) string {
+	target := "if"
 	nextStr := strings.TrimPrefix(str, target)
 	matched := alnum(nextStr)
 

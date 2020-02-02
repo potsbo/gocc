@@ -161,6 +161,14 @@ func (p *Parser) program() ([]*Node, error) {
 }
 
 func (p *Parser) stmt() (*Node, error) {
+	ifs, err := p.ifstmt()
+	if err != nil {
+		return nil, fail.Wrap(err)
+	}
+	if ifs != nil {
+		return ifs, nil
+	}
+
 	var n *Node
 	if p.tokenProcessor.ConsumeReturn() {
 		l, err := p.expr()
@@ -179,6 +187,33 @@ func (p *Parser) stmt() (*Node, error) {
 		return nil, fail.Wrap(err)
 	}
 	return n, nil
+}
+
+func (p *Parser) ifstmt() (*Node, error) {
+	if t := p.tokenProcessor.ConsumeKind(token.If); t == nil {
+		return nil, nil
+	}
+	if err := p.tokenProcessor.Expect("("); err != nil {
+		return nil, fail.Wrap(err)
+	}
+
+	condition, err := p.expr()
+	if err != nil {
+		return nil, fail.Wrap(err)
+	}
+	if err := p.tokenProcessor.Expect(")"); err != nil {
+		return nil, fail.Wrap(err)
+	}
+	firstStmt, err := p.stmt()
+	if err != nil {
+		return nil, fail.Wrap(err)
+	}
+
+	if t := p.tokenProcessor.ConsumeKind(token.Else); t != nil {
+		// TODO
+	}
+
+	return &Node{kind: If, lhs: condition, rhs: firstStmt}, nil
 }
 
 func (p *Parser) expr() (*Node, error) {
