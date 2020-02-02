@@ -18,6 +18,7 @@ var (
 
 const (
 	_ Kind = iota
+	Return
 	Reserved
 	Ident
 	Num
@@ -26,6 +27,8 @@ const (
 
 func (k Kind) String() string {
 	switch k {
+	case Return:
+		return "Return"
 	case Reserved:
 		return "Reserved"
 	case Ident:
