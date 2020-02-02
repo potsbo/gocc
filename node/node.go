@@ -25,6 +25,7 @@ const (
 	LVar
 	Assign
 	Return
+	If
 )
 
 type Node struct {
@@ -40,6 +41,15 @@ func newNodeNum(n int) *Node {
 		val:  n,
 		kind: Num,
 	}
+}
+
+var (
+	labelNum = 0
+)
+
+func newLabelNum() int {
+	labelNum += 1
+	return labelNum
 }
 
 func gen_lval(node *Node) (string, error) {
@@ -61,6 +71,30 @@ func gen_lval(node *Node) (string, error) {
 func gen(node *Node) (string, error) {
 	if node == nil {
 		return "", nil
+	}
+	if node.kind == If {
+		l, err := gen(node.lhs)
+		if err != nil {
+			return "", fail.Wrap(err)
+		}
+		r, err := gen(node.rhs)
+		if err != nil {
+			return "", fail.Wrap(err)
+		}
+		label := fmt.Sprintf(".Lend%d", newLabelNum())
+		lines := []string{
+			"# ifstmt",
+			"## condition start",
+			l,
+			"## condition end",
+			"  pop rax",
+			"  cmp rax, 0",
+			"  je  " + label,
+			r,
+			label + ":",
+			"# ifstmt end",
+		}
+		return strings.Join(lines, "\n"), nil
 	}
 	if node.kind == Return {
 		l, err := gen(node.lhs)
