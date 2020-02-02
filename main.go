@@ -36,7 +36,7 @@ func inspectTokens(tokens []token.Token) {
 
 func compile() error {
 	if len(os.Args) != 2 {
-		errors.New("Wrong size of arguments")
+		return errors.New("Wrong size of arguments")
 	}
 
 	fmt.Println(".intel_syntax noprefix")

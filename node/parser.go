@@ -9,6 +9,12 @@ import (
 
 type Parser struct {
 	tokenProcessor *token.Processor
+	locals         []lvar
+}
+
+type lvar struct {
+	str string
+	offset int
 }
 
 func NewParser(t *token.Processor) Parser {
@@ -183,12 +189,8 @@ func (p *Parser) primary() (*Node, error) {
 	}
 
 	if str, ok := p.tokenProcessor.ConsumeIdent(); ok {
-		firstChar := rune(str[0])
-		of := p.offset(firstChar)
-		if of < 0 {
-			return nil, fail.Errorf("Unexpected offset %d", of)
-		}
-		return &Node{kind: LVar, offset: of}, nil
+		v := p.findLocal(str)
+		return &Node{kind: LVar, offset: v.offset}, nil
 	}
 
 	// そうでなければ数値のはず
@@ -199,14 +201,19 @@ func (p *Parser) primary() (*Node, error) {
 	return newNodeNum(i), nil
 }
 
-func (p *Parser) offset(c rune) int {
-	chars := []rune{'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'}
-	for i, v := range chars {
-		if c == v {
-			return (i + 1) * 8
+func (p *Parser) findLocal(str string) lvar {
+	lastOffset := 0
+	for _, local := range p.locals {
+		if local.str == str {
+			return local
 		}
+		lastOffset = local.offset
 	}
-	return -1
+
+	n := lvar{offset: lastOffset + 8, str: str}
+	p.locals = append(p.locals, n)
+
+	return n
 }
 
 func (p *Parser) assign() (*Node, error) {
