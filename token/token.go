@@ -153,6 +153,11 @@ func Tokenize(str string) (*Processor, error) {
 	for {
 		var i int
 		var err error
+		if v := isReturn(str); v != "" {
+			cur = cur.chain(Return, v)
+			str = str[len(v):]
+			break
+		}
 		if len(str) == 0 {
 			cur = cur.chain(Eof, "")
 			break
@@ -188,6 +193,13 @@ func Tokenize(str string) (*Processor, error) {
 	}
 
 	return &Processor{head.next}, nil
+}
+
+func isReturn(str string) string {
+	if strings.HasPrefix(str, "return") {
+		return "return"
+	}
+	return ""
 }
 
 func isIdent(str string) string {
