@@ -28,16 +28,48 @@ const (
 	If
 )
 
-type Node struct {
-	kind   Kind  // ノードの型
-	lhs    *Node // 左辺
-	rhs    *Node // 右辺
-	val    int   // kindがND_NUMの場合のみ使う
-	offset int   // kindがND_LVARの場合のみ使う
+type Node interface {
+	Generate() (string, error)
+	Kind() Kind
+	Lhs() Node
+	Rhs() Node
+	Offset() int
+	Val() int
 }
 
-func newNodeNum(n int) *Node {
-	return &Node{
+type nodeImpl struct {
+	kind   Kind // ノードの型
+	lhs    Node // 左辺
+	rhs    Node // 右辺
+	val    int  // kindがND_NUMの場合のみ使う
+	offset int  // kindがND_LVARの場合のみ使う
+}
+
+func (n *nodeImpl) Generate() (string, error) {
+	return gen(n)
+}
+
+func (n *nodeImpl) Kind() Kind {
+	return n.kind
+}
+
+func (n *nodeImpl) Rhs() Node {
+	return n.rhs
+}
+
+func (n *nodeImpl) Lhs() Node {
+	return n.lhs
+}
+
+func (n *nodeImpl) Offset() int {
+	return n.offset
+}
+func (n *nodeImpl) Val() int {
+	return n.val
+}
+
+func newnodeImplNum(n int) *nodeImpl {
+	return &nodeImpl{
 		val:  n,
 		kind: Num,
 	}
@@ -52,15 +84,15 @@ func newLabelNum() int {
 	return labelNum
 }
 
-func gen_lval(node *Node) (string, error) {
-	if node.kind != LVar {
-		return "", fail.Errorf("Unexpected kind %d, expected %d", node.kind, LVar)
+func gen_lval(node Node) (string, error) {
+	if node.Kind() != LVar {
+		return "", fail.Errorf("Unexpected kind %d, expected %d", node.Kind(), LVar)
 	}
 
 	lines := []string{
 		"## push var pointer",
 		fmt.Sprintf("  mov rax, rbp"),
-		fmt.Sprintf("  sub rax, %d", node.offset),
+		fmt.Sprintf("  sub rax, %d", node.Offset()),
 		fmt.Sprintf("  push rax"),
 		"## end",
 	}
@@ -68,16 +100,16 @@ func gen_lval(node *Node) (string, error) {
 	return strings.Join(lines, "\n"), nil
 }
 
-func gen(node *Node) (string, error) {
+func gen(node Node) (string, error) {
 	if node == nil {
 		return "", nil
 	}
-	if node.kind == If {
-		l, err := gen(node.lhs)
+	if node.Kind() == If {
+		l, err := gen(node.Lhs())
 		if err != nil {
 			return "", fail.Wrap(err)
 		}
-		r, err := gen(node.rhs)
+		r, err := gen(node.Rhs())
 		if err != nil {
 			return "", fail.Wrap(err)
 		}
@@ -96,8 +128,8 @@ func gen(node *Node) (string, error) {
 		}
 		return strings.Join(lines, "\n"), nil
 	}
-	if node.kind == Return {
-		l, err := gen(node.lhs)
+	if node.Kind() == Return {
+		l, err := gen(node.Lhs())
 		if err != nil {
 			return "", fail.Wrap(err)
 		}
@@ -112,10 +144,10 @@ func gen(node *Node) (string, error) {
 		}
 		return strings.Join(lines, "\n"), nil
 	}
-	if node.kind == Num {
-		return fmt.Sprintf("# Num\n  push %d", node.val), nil
+	if node.Kind() == Num {
+		return fmt.Sprintf("# Num\n  push %d", node.Val()), nil
 	}
-	if node.kind == LVar {
+	if node.Kind() == LVar {
 		l, err := gen_lval(node)
 		if err != nil {
 			return "", fail.Wrap(err)
@@ -130,12 +162,12 @@ func gen(node *Node) (string, error) {
 		}
 		return strings.Join(lines, "\n"), nil
 	}
-	if node.kind == Assign {
-		l, err := gen_lval(node.lhs)
+	if node.Kind() == Assign {
+		l, err := gen_lval(node.Lhs())
 		if err != nil {
 			return "", fail.Wrap(err)
 		}
-		r, err := gen(node.rhs)
+		r, err := gen(node.Rhs())
 		if err != nil {
 			return "", fail.Wrap(err)
 		}
@@ -154,11 +186,11 @@ func gen(node *Node) (string, error) {
 		return strings.Join(lines, "\n"), nil
 	}
 
-	l, err := gen(node.lhs)
+	l, err := gen(node.Lhs())
 	if err != nil {
 		return "", fail.Wrap(err)
 	}
-	r, err := gen(node.rhs)
+	r, err := gen(node.Rhs())
 	if err != nil {
 		return "", fail.Wrap(err)
 	}
@@ -171,7 +203,7 @@ func gen(node *Node) (string, error) {
 		"  pop rax",
 	}
 
-	switch node.kind {
+	switch node.Kind() {
 	case Add:
 		lines = append(lines, "# Add")
 		lines = append(lines, "  add rax, rdi")
@@ -220,7 +252,7 @@ func gen(node *Node) (string, error) {
 		lines = append(lines, "  setle al")
 		lines = append(lines, "  movzx rax, al")
 	default:
-		return "", fail.Errorf("Token not supported %d", node.kind)
+		return "", fail.Errorf("Token not supported %d", node.Kind())
 	}
 
 	lines = append(lines, "  push rax")
