@@ -97,27 +97,7 @@ func gen(node Node) (string, error) {
 		return node.Generate()
 	}
 	if node.Kind() == Assign {
-		l, err := node.Lhs().GeneratePointer()
-		if err != nil {
-			return "", fail.Wrap(err)
-		}
-		r, err := gen(node.Rhs())
-		if err != nil {
-			return "", fail.Wrap(err)
-		}
-
-		lines := []string{
-			"# assign",
-			l, r,
-			"## pop from stack",
-			"  pop rdi",
-			"  pop rax",
-			"## assign",
-			"  mov [rax], rdi",
-			"  push rdi",
-		}
-
-		return strings.Join(lines, "\n"), nil
+		return node.Generate()
 	}
 
 	l, err := gen(node.Lhs())

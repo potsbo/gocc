@@ -271,7 +271,7 @@ func (p *Parser) assign() (Node, error) {
 		if err != nil {
 			return nil, fail.Wrap(err)
 		}
-		return &nodeImpl{kind: Assign, lhs: n, rhs: r}, nil
+		return newAssign(n, r), nil
 	}
 
 	return n, nil
