@@ -21,6 +21,7 @@ const (
 	_ Kind = iota
 	Return
 	If
+	While
 	Else
 	Reserved
 	Ident
@@ -30,6 +31,8 @@ const (
 
 func (k Kind) String() string {
 	switch k {
+	case While:
+		return "While"
 	case If:
 		return "If"
 	case Else:
@@ -212,6 +215,11 @@ func Tokenize(str string) (*Processor, error) {
 			str = str[len(v):]
 			continue
 		}
+		if v := isWhile(str); v != "" {
+			cur = cur.chain(While, v)
+			str = str[len(v):]
+			continue
+		}
 
 		if str[0] == ' ' {
 			str = str[1:]
@@ -268,6 +276,17 @@ func isIf(str string) string {
 
 func isElse(str string) string {
 	target := "else"
+	nextStr := strings.TrimPrefix(str, target)
+	matched := alnum(nextStr)
+
+	if strings.HasPrefix(str, target) && matched == "" {
+		return target
+	}
+	return ""
+}
+
+func isWhile(str string) string {
+	target := "while"
 	nextStr := strings.TrimPrefix(str, target)
 	matched := alnum(nextStr)
 
