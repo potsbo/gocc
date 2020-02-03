@@ -23,6 +23,7 @@ const (
 	Assign
 	Return
 	If
+	Nop
 )
 
 var (
@@ -40,3 +41,9 @@ func newLabelNum() int {
 	labelNum += 1
 	return labelNum
 }
+
+type nopNode struct{}
+
+func (n nopNode) Generate() (string, error)        { return "", nil }
+func (n nopNode) GeneratePointer() (string, error) { return "", nil }
+func (n nopNode) Kind() Kind                       { return Nop }

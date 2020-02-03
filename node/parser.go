@@ -209,11 +209,16 @@ func (p *Parser) ifstmt() (Node, error) {
 		return nil, fail.Wrap(err)
 	}
 
+	var secondStmt Node = nopNode{}
 	if t := p.tokenProcessor.ConsumeKind(token.Else); t != nil {
-		// TODO
+		var err error
+		secondStmt, err = p.stmt()
+		if err != nil {
+			return nil, fail.Wrap(err)
+		}
 	}
 
-	return newIf(condition, firstStmt, nil), nil
+	return newIf(condition, firstStmt, secondStmt), nil
 }
 
 func (p *Parser) expr() (Node, error) {

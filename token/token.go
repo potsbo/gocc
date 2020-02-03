@@ -207,6 +207,11 @@ func Tokenize(str string) (*Processor, error) {
 			str = str[len(v):]
 			continue
 		}
+		if v := isElse(str); v != "" {
+			cur = cur.chain(Else, v)
+			str = str[len(v):]
+			continue
+		}
 
 		if str[0] == ' ' {
 			str = str[1:]
@@ -252,6 +257,17 @@ func isReturn(str string) string {
 }
 func isIf(str string) string {
 	target := "if"
+	nextStr := strings.TrimPrefix(str, target)
+	matched := alnum(nextStr)
+
+	if strings.HasPrefix(str, target) && matched == "" {
+		return target
+	}
+	return ""
+}
+
+func isElse(str string) string {
+	target := "else"
 	nextStr := strings.TrimPrefix(str, target)
 	matched := alnum(nextStr)
 
