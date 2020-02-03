@@ -3,16 +3,12 @@ package node
 import "fmt"
 
 type nodeNum struct {
-	kind Kind // ノードの型
-	lhs  Node // 左辺
-	rhs  Node // 右辺
-	val  int
+	val int
 }
 
 func newnodeImplNum(n int) Node {
 	return &nodeNum{
-		val:  n,
-		kind: Num,
+		val: n,
 	}
 }
 
@@ -22,15 +18,17 @@ func (n *nodeNum) Generate() (string, error) {
 }
 
 func (n *nodeNum) Kind() Kind {
-	return n.kind
+	return Num
 }
 
+// TODO: delete
 func (n *nodeNum) Rhs() Node {
-	return n.rhs
+	return nil
 }
 
+// TODO: delete
 func (n *nodeNum) Lhs() Node {
-	return n.lhs
+	return nil
 }
 
 // TODO: delete
