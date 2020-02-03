@@ -175,7 +175,7 @@ func (p *Parser) stmt() (Node, error) {
 		if err != nil {
 			return nil, fail.Wrap(err)
 		}
-		n = &nodeImpl{kind: Return, lhs: l}
+		n = newReturn(l)
 	} else {
 		var err error
 		n, err = p.expr()

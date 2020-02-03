@@ -117,20 +117,7 @@ func gen(node Node) (string, error) {
 		return strings.Join(lines, "\n"), nil
 	}
 	if node.Kind() == Return {
-		l, err := gen(node.Lhs())
-		if err != nil {
-			return "", fail.Wrap(err)
-		}
-		lines := []string{
-			l,
-			"# epilogue",
-			"  pop rax",
-			"  mov rsp, rbp",
-			"  pop rbp",
-			"  ret",
-			"# epilogue end",
-		}
-		return strings.Join(lines, "\n"), nil
+		return node.Generate()
 	}
 	if node.Kind() == Num {
 		return node.Generate()
