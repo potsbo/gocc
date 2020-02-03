@@ -161,12 +161,24 @@ func (p *Parser) program() ([]Node, error) {
 }
 
 func (p *Parser) stmt() (Node, error) {
-	ifs, err := p.ifstmt()
-	if err != nil {
-		return nil, fail.Wrap(err)
+	{
+		ifs, err := p.ifstmt()
+		if err != nil {
+			return nil, fail.Wrap(err)
+		}
+		if ifs != nil {
+			return ifs, nil
+		}
 	}
-	if ifs != nil {
-		return ifs, nil
+
+	{
+		whiles, err := p.whilestmt()
+		if err != nil {
+			return nil, fail.Wrap(err)
+		}
+		if whiles != nil {
+			return whiles, nil
+		}
 	}
 
 	var n Node
@@ -219,6 +231,30 @@ func (p *Parser) ifstmt() (Node, error) {
 	}
 
 	return newIf(condition, firstStmt, secondStmt), nil
+}
+
+func (p *Parser) whilestmt() (Node, error) {
+	if t := p.tokenProcessor.ConsumeKind(token.While); t == nil {
+		return nil, nil
+	}
+
+	if err := p.tokenProcessor.Expect("("); err != nil {
+		return nil, fail.Wrap(err)
+	}
+
+	condition, err := p.expr()
+	if err != nil {
+		return nil, fail.Wrap(err)
+	}
+	if err := p.tokenProcessor.Expect(")"); err != nil {
+		return nil, fail.Wrap(err)
+	}
+	stmt, err := p.stmt()
+	if err != nil {
+		return nil, fail.Wrap(err)
+	}
+
+	return newWhile(condition, stmt), nil
 }
 
 func (p *Parser) expr() (Node, error) {

@@ -50,5 +50,6 @@ try 8 'return 8;'
 try 2 'a = 1; if (1) a = 2; return a;'
 try 1 'a = 1; if (0) a = 2; return a;'
 try 3 'a = 1; if (0) a = 2; else a = 3; return a;'
+try 128 'a = 2; while (a < 100) a = a * 2; return a;'
 
 echo OK

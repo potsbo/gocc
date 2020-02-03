@@ -23,6 +23,7 @@ const (
 	Assign
 	Return
 	If
+	While
 	Nop
 )
 

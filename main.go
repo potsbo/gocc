@@ -63,7 +63,6 @@ func compile() error {
 			return fail.Wrap(err)
 		}
 		fmt.Println(prog)
-		fmt.Println("  pop rax")
 	}
 
 	return nil
