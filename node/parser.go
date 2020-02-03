@@ -32,7 +32,7 @@ func (p *Parser) equality() (Node, error) {
 			if err != nil {
 				return nil, fail.Wrap(err)
 			}
-			node = &nodeImpl{kind: Equal, lhs: node, rhs: r}
+			node = newBinaryOperator(Equal, node, r)
 			continue
 		}
 
@@ -41,7 +41,7 @@ func (p *Parser) equality() (Node, error) {
 			if err != nil {
 				return nil, fail.Wrap(err)
 			}
-			node = &nodeImpl{kind: NotEqual, lhs: node, rhs: r}
+			node = newBinaryOperator(NotEqual, node, r)
 			continue
 		}
 		return node, nil
@@ -60,7 +60,7 @@ func (p *Parser) relational() (Node, error) {
 			if err != nil {
 				return nil, err
 			}
-			node = &nodeImpl{kind: SmallerThanOrEqualTo, lhs: node, rhs: r}
+			node = newBinaryOperator(SmallerThanOrEqualTo, node, r)
 			continue
 		}
 		if p.tokenProcessor.ConsumeReserved(">=") {
@@ -68,7 +68,7 @@ func (p *Parser) relational() (Node, error) {
 			if err != nil {
 				return nil, err
 			}
-			node = &nodeImpl{kind: GreaterThanOrEqualTo, lhs: node, rhs: r}
+			node = newBinaryOperator(GreaterThanOrEqualTo, node, r)
 			continue
 		}
 		if p.tokenProcessor.ConsumeReserved("<") {
@@ -76,7 +76,7 @@ func (p *Parser) relational() (Node, error) {
 			if err != nil {
 				return nil, err
 			}
-			node = &nodeImpl{kind: SmallerThan, lhs: node, rhs: r}
+			node = newBinaryOperator(SmallerThan, node, r)
 			continue
 		}
 		if p.tokenProcessor.ConsumeReserved(">") {
@@ -84,7 +84,7 @@ func (p *Parser) relational() (Node, error) {
 			if err != nil {
 				return nil, err
 			}
-			node = &nodeImpl{kind: GreaterThan, lhs: node, rhs: r}
+			node = newBinaryOperator(GreaterThan, node, r)
 			continue
 		}
 		return node, nil
@@ -103,7 +103,7 @@ func (p *Parser) add() (Node, error) {
 			if err != nil {
 				return nil, err
 			}
-			node = &nodeImpl{kind: Add, lhs: node, rhs: r}
+			node = newBinaryOperator(Add, node, r)
 			continue
 		}
 		if p.tokenProcessor.ConsumeReserved("-") {
@@ -111,7 +111,7 @@ func (p *Parser) add() (Node, error) {
 			if err != nil {
 				return nil, err
 			}
-			node = &nodeImpl{kind: Sub, lhs: node, rhs: r}
+			node = newBinaryOperator(Sub, node, r)
 			continue
 		}
 		return node, nil
@@ -130,7 +130,7 @@ func (p *Parser) mul() (Node, error) {
 			if err != nil {
 				return nil, fail.Wrap(err)
 			}
-			node = &nodeImpl{kind: Mul, lhs: node, rhs: r}
+			node = newBinaryOperator(Mul, node, r)
 			continue
 		}
 
@@ -139,7 +139,7 @@ func (p *Parser) mul() (Node, error) {
 			if err != nil {
 				return nil, fail.Wrap(err)
 			}
-			node = &nodeImpl{kind: Div, lhs: node, rhs: r}
+			node = newBinaryOperator(Div, node, r)
 		}
 		return node, nil
 	}
@@ -290,7 +290,7 @@ func (p *Parser) unary() (Node, error) {
 		if err != nil {
 			return nil, err
 		}
-		return &nodeImpl{kind: Sub, lhs: newnodeImplNum(0), rhs: n}, nil
+		return newBinaryOperator(Sub, newnodeImplNum(0), n), nil
 	}
 
 	return p.primary()
@@ -304,7 +304,7 @@ func (p *Parser) Generate() (string, error) {
 
 	programs := []string{}
 	for _, node := range nodes {
-		str, err := gen(node)
+		str, err := node.Generate()
 		if err != nil {
 			return "", fail.Wrap(err)
 		}

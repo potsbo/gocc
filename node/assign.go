@@ -27,7 +27,7 @@ func (n *nodeAssign) Generate() (string, error) {
 	if err != nil {
 		return "", fail.Wrap(err)
 	}
-	r, err := gen(n.rhs)
+	r, err := n.rhs.Generate()
 	if err != nil {
 		return "", fail.Wrap(err)
 	}
