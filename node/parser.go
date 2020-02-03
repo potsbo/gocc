@@ -21,7 +21,7 @@ func NewParser(t *token.Processor) Parser {
 	return Parser{tokenProcessor: t}
 }
 
-func (p *Parser) equality() (*Node, error) {
+func (p *Parser) equality() (Node, error) {
 	node, err := p.relational()
 	if err != nil {
 		return nil, fail.Wrap(err)
@@ -32,7 +32,7 @@ func (p *Parser) equality() (*Node, error) {
 			if err != nil {
 				return nil, fail.Wrap(err)
 			}
-			node = &Node{kind: Equal, lhs: node, rhs: r}
+			node = newBinaryOperator(Equal, node, r)
 			continue
 		}
 
@@ -41,14 +41,14 @@ func (p *Parser) equality() (*Node, error) {
 			if err != nil {
 				return nil, fail.Wrap(err)
 			}
-			node = &Node{kind: NotEqual, lhs: node, rhs: r}
+			node = newBinaryOperator(NotEqual, node, r)
 			continue
 		}
 		return node, nil
 	}
 }
 
-func (p *Parser) relational() (*Node, error) {
+func (p *Parser) relational() (Node, error) {
 	node, err := p.add()
 	if err != nil {
 		return nil, err
@@ -60,7 +60,7 @@ func (p *Parser) relational() (*Node, error) {
 			if err != nil {
 				return nil, err
 			}
-			node = &Node{kind: SmallerThanOrEqualTo, lhs: node, rhs: r}
+			node = newBinaryOperator(SmallerThanOrEqualTo, node, r)
 			continue
 		}
 		if p.tokenProcessor.ConsumeReserved(">=") {
@@ -68,7 +68,7 @@ func (p *Parser) relational() (*Node, error) {
 			if err != nil {
 				return nil, err
 			}
-			node = &Node{kind: GreaterThanOrEqualTo, lhs: node, rhs: r}
+			node = newBinaryOperator(GreaterThanOrEqualTo, node, r)
 			continue
 		}
 		if p.tokenProcessor.ConsumeReserved("<") {
@@ -76,7 +76,7 @@ func (p *Parser) relational() (*Node, error) {
 			if err != nil {
 				return nil, err
 			}
-			node = &Node{kind: SmallerThan, lhs: node, rhs: r}
+			node = newBinaryOperator(SmallerThan, node, r)
 			continue
 		}
 		if p.tokenProcessor.ConsumeReserved(">") {
@@ -84,14 +84,14 @@ func (p *Parser) relational() (*Node, error) {
 			if err != nil {
 				return nil, err
 			}
-			node = &Node{kind: GreaterThan, lhs: node, rhs: r}
+			node = newBinaryOperator(GreaterThan, node, r)
 			continue
 		}
 		return node, nil
 	}
 }
 
-func (p *Parser) add() (*Node, error) {
+func (p *Parser) add() (Node, error) {
 	node, err := p.mul()
 	if err != nil {
 		return nil, err
@@ -103,7 +103,7 @@ func (p *Parser) add() (*Node, error) {
 			if err != nil {
 				return nil, err
 			}
-			node = &Node{kind: Add, lhs: node, rhs: r}
+			node = newBinaryOperator(Add, node, r)
 			continue
 		}
 		if p.tokenProcessor.ConsumeReserved("-") {
@@ -111,14 +111,14 @@ func (p *Parser) add() (*Node, error) {
 			if err != nil {
 				return nil, err
 			}
-			node = &Node{kind: Sub, lhs: node, rhs: r}
+			node = newBinaryOperator(Sub, node, r)
 			continue
 		}
 		return node, nil
 	}
 }
 
-func (p *Parser) mul() (*Node, error) {
+func (p *Parser) mul() (Node, error) {
 	node, err := p.unary()
 	if err != nil {
 		return nil, fail.Wrap(err)
@@ -130,7 +130,7 @@ func (p *Parser) mul() (*Node, error) {
 			if err != nil {
 				return nil, fail.Wrap(err)
 			}
-			node = &Node{kind: Mul, lhs: node, rhs: r}
+			node = newBinaryOperator(Mul, node, r)
 			continue
 		}
 
@@ -139,14 +139,14 @@ func (p *Parser) mul() (*Node, error) {
 			if err != nil {
 				return nil, fail.Wrap(err)
 			}
-			node = &Node{kind: Div, lhs: node, rhs: r}
+			node = newBinaryOperator(Div, node, r)
 		}
 		return node, nil
 	}
 }
 
-func (p *Parser) program() ([]*Node, error) {
-	stmts := []*Node{}
+func (p *Parser) program() ([]Node, error) {
+	stmts := []Node{}
 	for {
 		if p.tokenProcessor.Finished() {
 			break
@@ -160,7 +160,7 @@ func (p *Parser) program() ([]*Node, error) {
 	return stmts, nil
 }
 
-func (p *Parser) stmt() (*Node, error) {
+func (p *Parser) stmt() (Node, error) {
 	ifs, err := p.ifstmt()
 	if err != nil {
 		return nil, fail.Wrap(err)
@@ -169,13 +169,13 @@ func (p *Parser) stmt() (*Node, error) {
 		return ifs, nil
 	}
 
-	var n *Node
+	var n Node
 	if p.tokenProcessor.ConsumeReturn() {
 		l, err := p.expr()
 		if err != nil {
 			return nil, fail.Wrap(err)
 		}
-		n = &Node{kind: Return, lhs: l}
+		n = newReturn(l)
 	} else {
 		var err error
 		n, err = p.expr()
@@ -189,7 +189,7 @@ func (p *Parser) stmt() (*Node, error) {
 	return n, nil
 }
 
-func (p *Parser) ifstmt() (*Node, error) {
+func (p *Parser) ifstmt() (Node, error) {
 	if t := p.tokenProcessor.ConsumeKind(token.If); t == nil {
 		return nil, nil
 	}
@@ -209,18 +209,23 @@ func (p *Parser) ifstmt() (*Node, error) {
 		return nil, fail.Wrap(err)
 	}
 
+	var secondStmt Node = nopNode{}
 	if t := p.tokenProcessor.ConsumeKind(token.Else); t != nil {
-		// TODO
+		var err error
+		secondStmt, err = p.stmt()
+		if err != nil {
+			return nil, fail.Wrap(err)
+		}
 	}
 
-	return &Node{kind: If, lhs: condition, rhs: firstStmt}, nil
+	return newIf(condition, firstStmt, secondStmt), nil
 }
 
-func (p *Parser) expr() (*Node, error) {
+func (p *Parser) expr() (Node, error) {
 	return p.assign()
 }
 
-func (p *Parser) primary() (*Node, error) {
+func (p *Parser) primary() (Node, error) {
 	if p.tokenProcessor.ConsumeReserved("(") {
 		node, err := p.expr()
 		if err != nil {
@@ -235,7 +240,7 @@ func (p *Parser) primary() (*Node, error) {
 
 	if str, ok := p.tokenProcessor.ConsumeIdent(); ok {
 		v := p.findLocal(str)
-		return &Node{kind: LVar, offset: v.offset}, nil
+		return newLValue(v.offset), nil
 	}
 
 	// そうでなければ数値のはず
@@ -243,7 +248,7 @@ func (p *Parser) primary() (*Node, error) {
 	if err != nil {
 		return nil, fail.Wrap(err)
 	}
-	return newNodeNum(i), nil
+	return newnodeImplNum(i), nil
 }
 
 func (p *Parser) findLocal(str string) lvar {
@@ -261,7 +266,7 @@ func (p *Parser) findLocal(str string) lvar {
 	return n
 }
 
-func (p *Parser) assign() (*Node, error) {
+func (p *Parser) assign() (Node, error) {
 	n, err := p.equality()
 	if err != nil {
 		return nil, fail.Wrap(err)
@@ -271,13 +276,13 @@ func (p *Parser) assign() (*Node, error) {
 		if err != nil {
 			return nil, fail.Wrap(err)
 		}
-		return &Node{kind: Assign, lhs: n, rhs: r}, nil
+		return newAssign(n, r), nil
 	}
 
 	return n, nil
 }
 
-func (p *Parser) unary() (*Node, error) {
+func (p *Parser) unary() (Node, error) {
 	if p.tokenProcessor.ConsumeReserved("+") {
 		n, err := p.primary()
 		if err != nil {
@@ -290,7 +295,7 @@ func (p *Parser) unary() (*Node, error) {
 		if err != nil {
 			return nil, err
 		}
-		return &Node{kind: Sub, lhs: newNodeNum(0), rhs: n}, nil
+		return newBinaryOperator(Sub, newnodeImplNum(0), n), nil
 	}
 
 	return p.primary()
@@ -304,7 +309,7 @@ func (p *Parser) Generate() (string, error) {
 
 	programs := []string{}
 	for _, node := range nodes {
-		str, err := gen(node)
+		str, err := node.Generate()
 		if err != nil {
 			return "", fail.Wrap(err)
 		}
