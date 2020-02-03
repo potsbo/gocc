@@ -46,6 +46,10 @@ func (n *nodeIf) Generate() (string, error) {
 	return strings.Join(lines, "\n"), nil
 }
 
+func (n *nodeIf) GeneratePointer() (string, error) {
+	return "", NoOffsetError
+}
+
 func (n *nodeIf) Kind() Kind {
 	return If
 }

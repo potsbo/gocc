@@ -1,7 +1,7 @@
 package node
 
 import (
-	"fmt"
+	"errors"
 	"strings"
 
 	"github.com/srvc/fail"
@@ -28,8 +28,13 @@ const (
 	If
 )
 
+var (
+	NoOffsetError = errors.New("Node is not LVal")
+)
+
 type Node interface {
 	Generate() (string, error)
+	GeneratePointer() (string, error)
 	Kind() Kind
 	Lhs() Node
 	Rhs() Node
@@ -44,6 +49,10 @@ type nodeImpl struct {
 
 func (n *nodeImpl) Generate() (string, error) {
 	return gen(n)
+}
+
+func (n *nodeImpl) GeneratePointer() (string, error) {
+	return "", NoOffsetError
 }
 
 func (n *nodeImpl) Kind() Kind {
@@ -71,14 +80,6 @@ func newLabelNum() int {
 	return labelNum
 }
 
-func gen_lval(node Node) (string, error) {
-	if node.Kind() != LVar {
-		return "", fail.Errorf("Unexpected kind %d, expected %d", node.Kind(), LVar)
-	}
-
-	return node.Generate()
-}
-
 func gen(node Node) (string, error) {
 	if node == nil {
 		return "", nil
@@ -93,22 +94,10 @@ func gen(node Node) (string, error) {
 		return node.Generate()
 	}
 	if node.Kind() == LVar {
-		l, err := gen_lval(node)
-		if err != nil {
-			return "", fail.Wrap(err)
-		}
-		lines := []string{
-			"# LVar",
-			l,
-			"## pushing the var value with following pointer",
-			fmt.Sprintf("  pop rax"),
-			fmt.Sprintf("  mov rax, [rax]"),
-			fmt.Sprintf("  push rax"),
-		}
-		return strings.Join(lines, "\n"), nil
+		return node.Generate()
 	}
 	if node.Kind() == Assign {
-		l, err := gen_lval(node.Lhs())
+		l, err := node.Lhs().GeneratePointer()
 		if err != nil {
 			return "", fail.Wrap(err)
 		}

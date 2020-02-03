@@ -14,7 +14,10 @@ func newnodeImplNum(n int) Node {
 
 func (n *nodeNum) Generate() (string, error) {
 	return fmt.Sprintf("# Num\n  push %d", n.val), nil
+}
 
+func (n *nodeNum) GeneratePointer() (string, error) {
+	return "", NoOffsetError
 }
 
 func (n *nodeNum) Kind() Kind {

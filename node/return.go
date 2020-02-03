@@ -33,6 +33,10 @@ func (n *nodeReturn) Generate() (string, error) {
 	return strings.Join(lines, "\n"), nil
 }
 
+func (n *nodeReturn) GeneratePointer() (string, error) {
+	return "", NoOffsetError
+}
+
 func (n *nodeReturn) Kind() Kind {
 	return Return
 }
