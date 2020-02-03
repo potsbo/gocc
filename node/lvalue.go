@@ -48,13 +48,3 @@ func (n *nodeLValue) Generate() (string, error) {
 func (n *nodeLValue) Kind() Kind {
 	return LVar
 }
-
-// TODO: delete
-func (n *nodeLValue) Rhs() Node {
-	return nil
-}
-
-// TODO: delete
-func (n *nodeLValue) Lhs() Node {
-	return nil
-}

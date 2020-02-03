@@ -101,13 +101,3 @@ func (n *nodeBinaryOperator) Generate() (string, error) {
 func (n *nodeBinaryOperator) Kind() Kind {
 	return n.kind
 }
-
-// TODO: delete
-func (n *nodeBinaryOperator) Rhs() Node {
-	return nil
-}
-
-// TODO: delete
-func (n *nodeBinaryOperator) Lhs() Node {
-	return nil
-}

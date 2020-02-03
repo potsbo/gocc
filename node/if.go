@@ -53,18 +53,3 @@ func (n *nodeIf) GeneratePointer() (string, error) {
 func (n *nodeIf) Kind() Kind {
 	return If
 }
-
-// TODO: delete
-func (n *nodeIf) Rhs() Node {
-	return nil
-}
-
-// TODO: delete
-func (n *nodeIf) Lhs() Node {
-	return nil
-}
-
-// TODO: delete
-func (n *nodeIf) Offset() int {
-	return 0
-}

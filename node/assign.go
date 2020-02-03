@@ -49,13 +49,3 @@ func (n *nodeAssign) Generate() (string, error) {
 func (n *nodeAssign) Kind() Kind {
 	return Assign
 }
-
-// TODO: delete
-func (n *nodeAssign) Rhs() Node {
-	return nil
-}
-
-// TODO: delete
-func (n *nodeAssign) Lhs() Node {
-	return nil
-}

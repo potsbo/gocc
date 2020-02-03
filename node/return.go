@@ -40,18 +40,3 @@ func (n *nodeReturn) GeneratePointer() (string, error) {
 func (n *nodeReturn) Kind() Kind {
 	return Return
 }
-
-// TODO: delete
-func (n *nodeReturn) Rhs() Node {
-	return nil
-}
-
-// TODO: delete
-func (n *nodeReturn) Lhs() Node {
-	return nil
-}
-
-// TODO: delete
-func (n *nodeReturn) Offset() int {
-	return 0
-}
