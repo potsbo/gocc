@@ -189,7 +189,7 @@ func (p *Parser) stmt() (Node, error) {
 	return n, nil
 }
 
-func (p *Parser) ifstmt() (*nodeImpl, error) {
+func (p *Parser) ifstmt() (Node, error) {
 	if t := p.tokenProcessor.ConsumeKind(token.If); t == nil {
 		return nil, nil
 	}
@@ -213,7 +213,7 @@ func (p *Parser) ifstmt() (*nodeImpl, error) {
 		// TODO
 	}
 
-	return &nodeImpl{kind: If, lhs: condition, rhs: firstStmt}, nil
+	return newIf(condition, firstStmt, nil), nil
 }
 
 func (p *Parser) expr() (Node, error) {

@@ -93,28 +93,7 @@ func gen(node Node) (string, error) {
 		return "", nil
 	}
 	if node.Kind() == If {
-		l, err := gen(node.Lhs())
-		if err != nil {
-			return "", fail.Wrap(err)
-		}
-		r, err := gen(node.Rhs())
-		if err != nil {
-			return "", fail.Wrap(err)
-		}
-		label := fmt.Sprintf(".Lend%d", newLabelNum())
-		lines := []string{
-			"# ifstmt",
-			"## condition start",
-			l,
-			"## condition end",
-			"  pop rax",
-			"  cmp rax, 0",
-			"  je  " + label,
-			r,
-			label + ":",
-			"# ifstmt end",
-		}
-		return strings.Join(lines, "\n"), nil
+		return node.Generate()
 	}
 	if node.Kind() == Return {
 		return node.Generate()

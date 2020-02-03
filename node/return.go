@@ -17,7 +17,7 @@ func newReturn(val Node) Node {
 }
 
 func (n *nodeReturn) Generate() (string, error) {
-	l, err := gen(n.val)
+	l, err := n.val.Generate()
 	if err != nil {
 		return "", fail.Wrap(err)
 	}
@@ -34,7 +34,7 @@ func (n *nodeReturn) Generate() (string, error) {
 }
 
 func (n *nodeReturn) Kind() Kind {
-	return Num
+	return Return
 }
 
 // TODO: delete
