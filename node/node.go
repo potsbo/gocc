@@ -34,14 +34,12 @@ type Node interface {
 	Lhs() Node
 	Rhs() Node
 	Offset() int
-	Val() int
 }
 
 type nodeImpl struct {
 	kind   Kind // ノードの型
 	lhs    Node // 左辺
 	rhs    Node // 右辺
-	val    int  // kindがND_NUMの場合のみ使う
 	offset int  // kindがND_LVARの場合のみ使う
 }
 
@@ -63,16 +61,6 @@ func (n *nodeImpl) Lhs() Node {
 
 func (n *nodeImpl) Offset() int {
 	return n.offset
-}
-func (n *nodeImpl) Val() int {
-	return n.val
-}
-
-func newnodeImplNum(n int) *nodeImpl {
-	return &nodeImpl{
-		val:  n,
-		kind: Num,
-	}
 }
 
 var (
@@ -145,7 +133,7 @@ func gen(node Node) (string, error) {
 		return strings.Join(lines, "\n"), nil
 	}
 	if node.Kind() == Num {
-		return fmt.Sprintf("# Num\n  push %d", node.Val()), nil
+		return node.Generate()
 	}
 	if node.Kind() == LVar {
 		l, err := gen_lval(node)
