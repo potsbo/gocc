@@ -235,7 +235,7 @@ func (p *Parser) primary() (Node, error) {
 
 	if str, ok := p.tokenProcessor.ConsumeIdent(); ok {
 		v := p.findLocal(str)
-		return &nodeImpl{kind: LVar, offset: v.offset}, nil
+		return newLValue(v.offset), nil
 	}
 
 	// そうでなければ数値のはず

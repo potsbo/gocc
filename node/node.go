@@ -33,7 +33,6 @@ type Node interface {
 	Kind() Kind
 	Lhs() Node
 	Rhs() Node
-	Offset() int
 }
 
 type nodeImpl struct {
@@ -77,15 +76,7 @@ func gen_lval(node Node) (string, error) {
 		return "", fail.Errorf("Unexpected kind %d, expected %d", node.Kind(), LVar)
 	}
 
-	lines := []string{
-		"## push var pointer",
-		fmt.Sprintf("  mov rax, rbp"),
-		fmt.Sprintf("  sub rax, %d", node.Offset()),
-		fmt.Sprintf("  push rax"),
-		"## end",
-	}
-
-	return strings.Join(lines, "\n"), nil
+	return node.Generate()
 }
 
 func gen(node Node) (string, error) {
