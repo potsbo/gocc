@@ -57,12 +57,22 @@ func compile() error {
 		if debug {
 			inspectTokens(proc.Inspect())
 		}
+
 		p := node.NewParser(proc)
-		prog, err := p.Generate()
+
+		ns, err := p.Parse()
 		if err != nil {
 			return fail.Wrap(err)
 		}
-		fmt.Println(prog)
+
+		for _, n := range ns {
+			lines, err := n.Generate()
+			if err != nil {
+				return fail.Wrap(err)
+			}
+			fmt.Println(lines)
+		}
+
 	}
 
 	return nil

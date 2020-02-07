@@ -1,8 +1,6 @@
 package node
 
 import (
-	"strings"
-
 	"github.com/potsbo/gocc/token"
 	"github.com/srvc/fail"
 )
@@ -337,20 +335,11 @@ func (p *Parser) unary() (Node, error) {
 	return p.primary()
 }
 
-func (p *Parser) Generate() (string, error) {
+func (p *Parser) Parse() ([]Node, error) {
 	nodes, err := p.program()
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	programs := []string{}
-	for _, node := range nodes {
-		str, err := node.Generate()
-		if err != nil {
-			return "", fail.Wrap(err)
-		}
-		programs = append(programs, str)
-	}
-
-	return strings.Join(programs, "\n"), nil
+	return nodes, nil
 }
