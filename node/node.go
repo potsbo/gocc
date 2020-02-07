@@ -24,6 +24,7 @@ const (
 	Return
 	If
 	While
+	For
 	Nop
 )
 

@@ -179,6 +179,16 @@ func (p *Parser) stmt() (Node, error) {
 		}
 	}
 
+	{
+		fors, err := p.forstmt()
+		if err != nil {
+			return nil, fail.Wrap(err)
+		}
+		if fors != nil {
+			return fors, nil
+		}
+	}
+
 	var n Node
 	if p.tokenProcessor.ConsumeReturn() {
 		l, err := p.expr()
@@ -253,6 +263,62 @@ func (p *Parser) whilestmt() (Node, error) {
 	}
 
 	return newWhile(condition, stmt), nil
+}
+
+func (p *Parser) forstmt() (Node, error) {
+	if t := p.tokenProcessor.ConsumeKind(token.For); t == nil {
+		return nil, nil
+	}
+
+	if err := p.tokenProcessor.Expect("("); err != nil {
+		return nil, fail.Wrap(err)
+	}
+
+	var init Node
+	if !p.tokenProcessor.ConsumeReserved(";") {
+		var err error
+		init, err = p.expr()
+		if err != nil {
+			return nil, fail.Wrap(err)
+		}
+
+		if err := p.tokenProcessor.Expect(";"); err != nil {
+			return nil, fail.Wrap(err)
+		}
+	}
+
+	var condition Node
+	if !p.tokenProcessor.ConsumeReserved(";") {
+		var err error
+		condition, err = p.expr()
+		if err != nil {
+			return nil, fail.Wrap(err)
+		}
+
+		if err := p.tokenProcessor.Expect(";"); err != nil {
+			return nil, fail.Wrap(err)
+		}
+	}
+
+	var update Node
+	if !p.tokenProcessor.ConsumeReserved(")") {
+		var err error
+		condition, err = p.expr()
+		if err != nil {
+			return nil, fail.Wrap(err)
+		}
+
+		if err := p.tokenProcessor.Expect(")"); err != nil {
+			return nil, fail.Wrap(err)
+		}
+	}
+
+	stmt, err := p.stmt()
+	if err != nil {
+		return nil, fail.Wrap(err)
+	}
+
+	return newFor(init, condition, update, stmt), nil
 }
 
 func (p *Parser) expr() (Node, error) {
