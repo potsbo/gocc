@@ -303,7 +303,7 @@ func (p *Parser) forstmt() (Node, error) {
 	var update Node
 	if !p.tokenProcessor.ConsumeReserved(")") {
 		var err error
-		condition, err = p.expr()
+		update, err = p.expr()
 		if err != nil {
 			return nil, fail.Wrap(err)
 		}
