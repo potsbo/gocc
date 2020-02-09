@@ -160,6 +160,30 @@ func (p *Parser) program() ([]Node, error) {
 
 func (p *Parser) stmt() (Node, error) {
 	{
+		ok := p.tokenProcessor.ConsumeReserved("{")
+		if ok {
+			var nodes []Node
+			flag := true
+
+			for flag {
+				n, err := p.stmt()
+				if err != nil {
+					return nil, fail.Wrap(err)
+				}
+				if n == nil {
+					flag = false
+					continue
+				}
+				nodes = append(nodes, n)
+			}
+			if err := p.tokenProcessor.Expect("}"); err != nil {
+				return nil, fail.Wrap(err)
+			}
+			return NewNodeBlock(nodes), nil
+		}
+
+	}
+	{
 		ifs, err := p.ifstmt()
 		if err != nil {
 			return nil, fail.Wrap(err)

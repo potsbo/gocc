@@ -25,6 +25,7 @@ const (
 	If
 	While
 	For
+	Block
 	Nop
 )
 
