@@ -158,53 +158,48 @@ func (p *Parser) program() ([]Node, error) {
 	return stmts, nil
 }
 
+func (p *Parser) match(patterns ...func() (Node, error)) (Node, error) {
+	for _, p := range patterns {
+		n, err := p()
+		if err != nil {
+			return nil, fail.Wrap(err)
+		}
+		if n != nil {
+			return n, nil
+		}
+	}
+	return nil, nil
+}
+
 func (p *Parser) stmt() (Node, error) {
-	{
-		ok := p.tokenProcessor.ConsumeReserved("{")
-		if ok {
-			var nodes []Node
+	return p.match(
+		p.block,
+		p.ifstmt,
+		p.whilestmt,
+		p.forstmt,
+		p.singleStmt,
+	)
+}
 
-			for !p.tokenProcessor.ConsumeReserved("}") {
-				n, err := p.stmt()
-				if err != nil {
-					return nil, fail.Wrap(err)
-				}
-				nodes = append(nodes, n)
-			}
-			return NewNodeBlock(nodes), nil
-		}
-
+func (p *Parser) block() (Node, error) {
+	ok := p.tokenProcessor.ConsumeReserved("{")
+	if !ok {
+		return nil, nil
 	}
-	{
-		ifs, err := p.ifstmt()
+
+	var nodes []Node
+
+	for !p.tokenProcessor.ConsumeReserved("}") {
+		n, err := p.stmt()
 		if err != nil {
 			return nil, fail.Wrap(err)
 		}
-		if ifs != nil {
-			return ifs, nil
-		}
+		nodes = append(nodes, n)
 	}
+	return NewNodeBlock(nodes), nil
+}
 
-	{
-		whiles, err := p.whilestmt()
-		if err != nil {
-			return nil, fail.Wrap(err)
-		}
-		if whiles != nil {
-			return whiles, nil
-		}
-	}
-
-	{
-		fors, err := p.forstmt()
-		if err != nil {
-			return nil, fail.Wrap(err)
-		}
-		if fors != nil {
-			return fors, nil
-		}
-	}
-
+func (p *Parser) singleStmt() (Node, error) {
 	var n Node
 	if p.tokenProcessor.ConsumeReturn() {
 		l, err := p.expr()
