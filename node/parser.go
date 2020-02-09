@@ -158,7 +158,7 @@ func (p *Parser) program() ([]Node, error) {
 	return stmts, nil
 }
 
-func (p *Parser) match(patterns ...func() (Node, error)) (Node, error) {
+func match(patterns ...func() (Node, error)) (Node, error) {
 	for _, p := range patterns {
 		n, err := p()
 		if err != nil {
@@ -172,7 +172,7 @@ func (p *Parser) match(patterns ...func() (Node, error)) (Node, error) {
 }
 
 func (p *Parser) stmt() (Node, error) {
-	return p.match(
+	return match(
 		p.block,
 		p.ifstmt,
 		p.whilestmt,
