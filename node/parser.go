@@ -163,21 +163,13 @@ func (p *Parser) stmt() (Node, error) {
 		ok := p.tokenProcessor.ConsumeReserved("{")
 		if ok {
 			var nodes []Node
-			flag := true
 
-			for flag {
+			for !p.tokenProcessor.ConsumeReserved("}") {
 				n, err := p.stmt()
 				if err != nil {
 					return nil, fail.Wrap(err)
 				}
-				if n == nil {
-					flag = false
-					continue
-				}
 				nodes = append(nodes, n)
-			}
-			if err := p.tokenProcessor.Expect("}"); err != nil {
-				return nil, fail.Wrap(err)
 			}
 			return NewNodeBlock(nodes), nil
 		}
