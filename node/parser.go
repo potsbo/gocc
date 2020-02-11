@@ -19,6 +19,30 @@ func NewParser(t *token.Processor) Parser {
 	return Parser{tokenProcessor: t}
 }
 
+type parseFunc func() (Node, error)
+
+func (p *Parser) tryBinaryOperator(k Kind, lhsGetter, rhsGetter parseFunc) parseFunc {
+	return func() (Node, error) {
+		lhs, err := lhsGetter()
+		if err != nil {
+			return nil, fail.Wrap(err)
+		}
+		t := k.Token()
+		if t == nil {
+			return nil, nil
+		}
+
+		if !p.tokenProcessor.ConsumeReserved(t.Str) {
+			return nil, nil
+		}
+		rhs, err := rhsGetter()
+		if err != nil {
+			return nil, fail.Wrap(err)
+		}
+		return newBinaryOperator(k, lhs, rhs), nil
+	}
+}
+
 func (p *Parser) equality() (Node, error) {
 	node, err := p.relational()
 	if err != nil {
@@ -350,6 +374,14 @@ func (p *Parser) primary() (Node, error) {
 	}
 
 	if str, ok := p.tokenProcessor.ConsumeIdent(); ok {
+		if p.tokenProcessor.ConsumeReserved("(") {
+			n := newFuncCall(str)
+			// TODO: parse args
+			if err := p.tokenProcessor.Expect(")"); err != nil {
+				return nil, fail.Wrap(err)
+			}
+			return n, nil
+		}
 		v := p.findLocal(str)
 		return newLValue(v.offset), nil
 	}

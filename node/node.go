@@ -2,6 +2,8 @@ package node
 
 import (
 	"errors"
+
+	"github.com/potsbo/gocc/token"
 )
 
 type Kind int
@@ -26,8 +28,19 @@ const (
 	While
 	For
 	Block
+	FuncCall
 	Nop
 )
+
+func (k Kind) Token() *token.Token {
+	switch k {
+	case Equal:
+		return &token.Token{Str: "==", Kind: token.Reserved}
+	case NotEqual:
+		return &token.Token{Str: "!=", Kind: token.Reserved}
+	}
+	return nil
+}
 
 var (
 	NoOffsetError = errors.New("Node is not LVal")
