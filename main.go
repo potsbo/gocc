@@ -40,14 +40,7 @@ func compile() error {
 	}
 
 	fmt.Println(".intel_syntax noprefix")
-	fmt.Println(".global _main")
-	fmt.Println("_main:")
-
-	fmt.Println("# prologue")
-	fmt.Println("  push rbp")
-	fmt.Println("  mov rbp, rsp")
-	fmt.Println("  sub rsp, 208") // 26 * 8
-	fmt.Println("# prologue end")
+	fmt.Println(".global _main") // TODO fix
 
 	{
 		proc, err := token.Tokenize(os.Args[1])

@@ -1,6 +1,8 @@
 package node
 
 import (
+	"errors"
+
 	"github.com/potsbo/gocc/token"
 	"github.com/srvc/fail"
 )
@@ -168,18 +170,45 @@ func (p *Parser) mul() (Node, error) {
 }
 
 func (p *Parser) program() ([]Node, error) {
-	stmts := []Node{}
+	funcs := []Node{}
+
 	for {
 		if p.tokenProcessor.Finished() {
 			break
 		}
-		n, err := p.stmt()
+		n, err := p.funcDef()
 		if err != nil {
 			return nil, fail.Wrap(err)
 		}
-		stmts = append(stmts, n)
+		if n == nil {
+			return nil, errors.New("No function found")
+		}
+		funcs = append(funcs, n)
 	}
-	return stmts, nil
+
+	return funcs, nil
+}
+
+func (p *Parser) funcDef() (Node, error) {
+	fname, ok := p.tokenProcessor.ConsumeIdent()
+	if !ok {
+		// TODO: should be error?
+		return nil, nil
+	}
+
+	if err := p.tokenProcessor.Expect("("); err != nil {
+		return nil, fail.Wrap(err)
+	}
+	if err := p.tokenProcessor.Expect(")"); err != nil {
+		return nil, fail.Wrap(err)
+	}
+
+	n, err := p.block()
+	if err != nil {
+		return nil, fail.Wrap(err)
+	}
+
+	return newNodeFunc(fname, n), nil
 }
 
 func match(patterns ...func() (Node, error)) (Node, error) {

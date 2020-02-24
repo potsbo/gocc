@@ -24,6 +24,7 @@ const (
 	LVar
 	Assign
 	Return
+	Func
 	If
 	While
 	For
