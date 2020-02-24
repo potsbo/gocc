@@ -8,14 +8,16 @@ import (
 )
 
 type nodeFunc struct {
-	name  string
-	block Node
+	offset int
+	name   string
+	block  Node
 }
 
-func newNodeFunc(name string, block Node) Node {
+func newNodeFunc(name string, offset int, block Node) Node {
 	return &nodeFunc{
-		name:  name,
-		block: block,
+		offset: offset,
+		name:   name,
+		block:  block,
 	}
 }
 
@@ -29,7 +31,7 @@ func (n *nodeFunc) Generate() (string, error) {
 		"# prologue",
 		"  push rbp",
 		"  mov rbp, rsp",
-		"  sub rsp, 216", // 26 * 8 // TODO: fix
+		fmt.Sprintf("  sub rsp, %d", n.offset),
 		"# prologue end",
 		l,
 	}

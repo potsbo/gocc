@@ -190,6 +190,7 @@ func (p *Parser) program() ([]Node, error) {
 }
 
 func (p *Parser) funcDef() (Node, error) {
+	p.resetLocal()
 	fname, ok := p.tokenProcessor.ConsumeIdent()
 	if !ok {
 		// TODO: should be error?
@@ -207,8 +208,9 @@ func (p *Parser) funcDef() (Node, error) {
 	if err != nil {
 		return nil, fail.Wrap(err)
 	}
+	offset := len(p.locals) * 8
 
-	return newNodeFunc(fname, n), nil
+	return newNodeFunc(fname, offset, n), nil
 }
 
 func match(patterns ...func() (Node, error)) (Node, error) {
@@ -436,6 +438,10 @@ func (p *Parser) findLocal(str string) lvar {
 	p.locals = append(p.locals, n)
 
 	return n
+}
+
+func (p *Parser) resetLocal() {
+	p.locals = nil
 }
 
 func (p *Parser) assign() (Node, error) {
