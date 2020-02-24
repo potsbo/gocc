@@ -24,9 +24,8 @@ func (n *nodeBlock) Generate() (string, error) {
 		lines[i] = strings.Join(
 			[]string{
 				line,
-				"  pop rax",
 			},
-			"\n",
+			"  pop rax\n",
 		)
 	}
 	return strings.Join(lines, "\n"), nil
