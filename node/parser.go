@@ -208,7 +208,7 @@ func (p *Parser) funcDef() (Node, error) {
 	if err != nil {
 		return nil, fail.Wrap(err)
 	}
-	offset := len(p.locals) * 8
+	offset := len(p.locals)*8 + 32 // TODO: not to use magic number
 
 	return newNodeFunc(fname, offset, n), nil
 }
