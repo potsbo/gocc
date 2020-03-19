@@ -200,6 +200,15 @@ func (p *Parser) funcDef() (Node, error) {
 	if err := p.tokenProcessor.Expect("("); err != nil {
 		return nil, fail.Wrap(err)
 	}
+	args := []Node{}
+	for {
+		vName, ok := p.tokenProcessor.ConsumeIdent()
+		if !ok {
+			break
+		}
+		v := p.findLocal(vName)
+		args = append(args, newLValue(v.offset))
+	}
 	if err := p.tokenProcessor.Expect(")"); err != nil {
 		return nil, fail.Wrap(err)
 	}
@@ -210,7 +219,7 @@ func (p *Parser) funcDef() (Node, error) {
 	}
 	offset := len(p.locals)*8 + 32 // TODO: not to use magic number
 
-	return newNodeFunc(fname, offset, n), nil
+	return newNodeFunc(fname, args, offset, n), nil
 }
 
 func match(patterns ...func() (Node, error)) (Node, error) {

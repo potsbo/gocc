@@ -11,10 +11,12 @@ type nodeFunc struct {
 	offset int
 	name   string
 	block  Node
+	args   []Node
 }
 
-func newNodeFunc(name string, offset int, block Node) Node {
+func newNodeFunc(name string, args []Node, offset int, block Node) Node {
 	return &nodeFunc{
+		args:   args,
 		offset: offset,
 		name:   name,
 		block:  block,
