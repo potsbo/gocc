@@ -517,6 +517,23 @@ func (p *Parser) unary() (Node, error) {
 		}
 		return newBinaryOperator(Sub, newnodeImplNum(0), n), nil
 	}
+	if p.tokenProcessor.ConsumeReserved("&") {
+		n, err := p.unary()
+		if err != nil {
+			return nil, err
+		}
+		if n == nil {
+			return nil, fail.New(`Non nil node required after "&"`)
+		}
+		return newNodeAddr(n), nil
+	}
+	if p.tokenProcessor.ConsumeReserved("*") {
+		n, err := p.unary()
+		if err != nil {
+			return nil, err
+		}
+		return newNodeDeref(n), nil
+	}
 
 	return p.primary()
 }
