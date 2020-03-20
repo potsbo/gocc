@@ -45,7 +45,7 @@ func (p *Parser) tryBinaryOperator(k Kind, lhsGetter, rhsGetter parseFunc) parse
 	}
 }
 
-func (p *Parser) equality() (Node, error) {
+func (p *Parser) equality() (Pointable, error) {
 	node, err := p.relational()
 	if err != nil {
 		return nil, fail.Wrap(err)
