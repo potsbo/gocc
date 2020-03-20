@@ -45,7 +45,7 @@ func (p *Parser) tryBinaryOperator(k Kind, lhsGetter, rhsGetter parseFunc) parse
 	}
 }
 
-func (p *Parser) equality() (Pointable, error) {
+func (p *Parser) equality() (Node, error) {
 	node, err := p.relational()
 	if err != nil {
 		return nil, fail.Wrap(err)
@@ -417,7 +417,7 @@ func (p *Parser) primary() (Node, error) {
 	}
 
 	{
-		n, err := p.funcCall()
+		n, err := p.resolveIdent()
 		if err != nil {
 			return nil, fail.Wrap(err)
 		}
@@ -437,8 +437,8 @@ func (p *Parser) primary() (Node, error) {
 	return newnodeImplNum(i), nil
 }
 
-func (p *Parser) funcCall() (Node, error) {
-	str, ok := p.tokenProcessor.ConsumeIdent()
+func (p *Parser) resolveIdent() (Node, error) {
+	ident, ok := p.tokenProcessor.ConsumeIdent()
 	if !ok {
 		return nil, nil
 	}
@@ -458,14 +458,14 @@ func (p *Parser) funcCall() (Node, error) {
 				break
 			}
 		}
-		n := newFuncCall(str, args)
+		n := newFuncCall(ident, args)
 		// TODO: parse args
 		if err := p.tokenProcessor.Expect(")"); err != nil {
 			return nil, fail.Wrap(err)
 		}
 		return n, nil
 	}
-	v := p.findLocal(str)
+	v := p.findLocal(ident)
 	return newLValue(v.offset), nil
 }
 
