@@ -437,7 +437,7 @@ func (p *Parser) primary() (Node, error) {
 func (p *Parser) funcCall() (Node, error) {
 	if str, ok := p.tokenProcessor.ConsumeIdent(); ok {
 		if p.tokenProcessor.ConsumeReserved("(") {
-			n := newFuncCall(str)
+			args := []Node{}
 			for {
 				arg, err := p.expr()
 				if err != nil {
@@ -446,7 +446,9 @@ func (p *Parser) funcCall() (Node, error) {
 				if arg == nil {
 					break
 				}
+				args = append(args, arg)
 			}
+			n := newFuncCall(str, args)
 			// TODO: parse args
 			if err := p.tokenProcessor.Expect(")"); err != nil {
 				return nil, fail.Wrap(err)

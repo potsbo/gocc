@@ -163,7 +163,7 @@ func (t *Processor) ConsumeNum() (int, bool, error) {
 	if err != nil {
 		return 0, false, fail.Wrap(err)
 	}
-	return i, false, nil
+	return i, true, nil
 }
 
 func (t *Processor) ExtractNum() (int, error) {
