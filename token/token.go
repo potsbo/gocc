@@ -150,6 +150,22 @@ func (t *Processor) ConsumeReserved(op string) bool {
 	return true
 }
 
+func (t *Processor) ConsumeNum() (int, bool, error) {
+	cur := t.token
+	if cur == nil {
+		return 0, false, nil
+	}
+	if cur.Kind != Num {
+		return 0, false, nil
+	}
+	t.token = cur.next
+	i, err := strconv.Atoi(cur.Str)
+	if err != nil {
+		return 0, false, fail.Wrap(err)
+	}
+	return i, false, nil
+}
+
 func (t *Processor) ExtractNum() (int, error) {
 	cur := t.token
 	if cur == nil {

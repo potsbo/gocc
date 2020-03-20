@@ -413,9 +413,40 @@ func (p *Parser) primary() (Node, error) {
 		return node, nil
 	}
 
+	{
+		n, err := p.funcCall()
+		if err != nil {
+			return nil, fail.Wrap(err)
+		}
+		if n != nil {
+			return n, nil
+		}
+	}
+
+	// そうでなければ数値のはず
+	i, ok, err := p.tokenProcessor.ConsumeNum()
+	if err != nil {
+		return nil, fail.Wrap(err)
+	}
+	if !ok {
+		return nil, nil
+	}
+	return newnodeImplNum(i), nil
+}
+
+func (p *Parser) funcCall() (Node, error) {
 	if str, ok := p.tokenProcessor.ConsumeIdent(); ok {
 		if p.tokenProcessor.ConsumeReserved("(") {
 			n := newFuncCall(str)
+			for {
+				arg, err := p.expr()
+				if err != nil {
+					return nil, fail.Wrap(err)
+				}
+				if arg == nil {
+					break
+				}
+			}
 			// TODO: parse args
 			if err := p.tokenProcessor.Expect(")"); err != nil {
 				return nil, fail.Wrap(err)
@@ -425,13 +456,7 @@ func (p *Parser) primary() (Node, error) {
 		v := p.findLocal(str)
 		return newLValue(v.offset), nil
 	}
-
-	// そうでなければ数値のはず
-	i, err := p.tokenProcessor.ExtractNum()
-	if err != nil {
-		return nil, fail.Wrap(err)
-	}
-	return newnodeImplNum(i), nil
+	return nil, nil
 }
 
 func (p *Parser) findLocal(str string) lvar {
