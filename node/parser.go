@@ -437,6 +437,7 @@ func (p *Parser) primary() (Node, error) {
 	return newnodeImplNum(i), nil
 }
 
+// parse func or var
 func (p *Parser) resolveIdent() (Node, error) {
 	ident, ok := p.tokenProcessor.ConsumeIdent()
 	if !ok {
