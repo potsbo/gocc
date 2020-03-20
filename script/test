@@ -63,5 +63,6 @@ try 123 'main(){return bar(123);}'
 try 46 'main(){return add(12, 34);}'
 try 1 'asis(a) { return a; } main(){return asis(1);}'
 try 3 'add(a, b) { return a + b; } main(){return add(1, 2);}'
+try 233 'fib(n) { if (n < 2) { return 1; } return fib(n - 1) + fib(n - 2); } main(){ return fib(12); }'
 
 echo OK
