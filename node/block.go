@@ -7,10 +7,10 @@ import (
 )
 
 type nodeBlock struct {
-	stmts []Node
+	stmts []Generatable
 }
 
-func NewNodeBlock(stmts []Node) Node {
+func NewNodeBlock(stmts []Generatable) Node {
 	return &nodeBlock{stmts}
 }
 

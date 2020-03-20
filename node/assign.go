@@ -7,11 +7,11 @@ import (
 )
 
 type nodeAssign struct {
-	lhs Node
-	rhs Node
+	lhs Pointable
+	rhs Generatable
 }
 
-func newAssign(lhs, rhs Node) Node {
+func newAssign(lhs Pointable, rhs Generatable) Node {
 	return &nodeAssign{
 		lhs: lhs,
 		rhs: rhs,

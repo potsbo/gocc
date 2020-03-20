@@ -14,7 +14,7 @@ type nodeFunc struct {
 	args   []Pointable
 }
 
-func newNodeFunc(name string, args []Pointable, offset int, block Generatable) Node {
+func newNodeFunc(name string, args []Pointable, offset int, block Generatable) Generatable {
 	return &nodeFunc{
 		args:   args,
 		offset: offset + len(args)*8,
@@ -55,8 +55,4 @@ func (n *nodeFunc) Generate() (string, error) {
 		l,
 	)
 	return strings.Join(lines, "\n"), nil
-}
-
-func (n *nodeFunc) GeneratePointer() (string, error) {
-	return "", NoOffsetError
 }

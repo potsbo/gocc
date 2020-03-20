@@ -8,13 +8,13 @@ import (
 )
 
 type nodeFor struct {
-	init      Node
-	condition Node
-	update    Node
-	stmt      Node
+	init      Generatable
+	condition Generatable
+	update    Generatable
+	stmt      Generatable
 }
 
-func newFor(init, c, update, stmt Node) Node {
+func newFor(init, c, update, stmt Generatable) Node {
 	return &nodeFor{
 		init:      init,
 		condition: c,

@@ -8,12 +8,12 @@ import (
 )
 
 type nodeIf struct {
-	condition      Node
-	trueStatement  Node
-	falseStatement Node
+	condition      Generatable
+	trueStatement  Generatable
+	falseStatement Generatable
 }
 
-func newIf(c, t, f Node) Node {
+func newIf(c, t, f Generatable) Node {
 	return &nodeIf{
 		condition:      c,
 		trueStatement:  t,

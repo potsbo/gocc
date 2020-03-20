@@ -8,11 +8,11 @@ import (
 )
 
 type nodeWhile struct {
-	condition Node
-	stmt      Node
+	condition Generatable
+	stmt      Generatable
 }
 
-func newWhile(c, stmt Node) Node {
+func newWhile(c, stmt Generatable) Node {
 	return &nodeWhile{
 		condition: c,
 		stmt:      stmt,

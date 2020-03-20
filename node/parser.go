@@ -169,8 +169,8 @@ func (p *Parser) mul() (Node, error) {
 	}
 }
 
-func (p *Parser) program() ([]Node, error) {
-	funcs := []Node{}
+func (p *Parser) program() ([]Generatable, error) {
+	funcs := []Generatable{}
 
 	for {
 		if p.tokenProcessor.Finished() {
@@ -189,7 +189,7 @@ func (p *Parser) program() ([]Node, error) {
 	return funcs, nil
 }
 
-func (p *Parser) funcDef() (Node, error) {
+func (p *Parser) funcDef() (Generatable, error) {
 	p.resetLocal()
 	fname, ok := p.tokenProcessor.ConsumeIdent()
 	if !ok {
@@ -225,7 +225,7 @@ func (p *Parser) funcDef() (Node, error) {
 	return newNodeFunc(fname, args, offset, n), nil
 }
 
-func match(patterns ...func() (Node, error)) (Node, error) {
+func match(patterns ...func() (Generatable, error)) (Generatable, error) {
 	for _, p := range patterns {
 		n, err := p()
 		if err != nil {
@@ -238,7 +238,7 @@ func match(patterns ...func() (Node, error)) (Node, error) {
 	return nil, nil
 }
 
-func (p *Parser) stmt() (Node, error) {
+func (p *Parser) stmt() (Generatable, error) {
 	return match(
 		p.block,
 		p.ifstmt,
@@ -248,13 +248,13 @@ func (p *Parser) stmt() (Node, error) {
 	)
 }
 
-func (p *Parser) block() (Node, error) {
+func (p *Parser) block() (Generatable, error) {
 	ok := p.tokenProcessor.ConsumeReserved("{")
 	if !ok {
 		return nil, nil
 	}
 
-	var nodes []Node
+	var nodes []Generatable
 
 	for !p.tokenProcessor.ConsumeReserved("}") {
 		n, err := p.stmt()
@@ -266,7 +266,7 @@ func (p *Parser) block() (Node, error) {
 	return NewNodeBlock(nodes), nil
 }
 
-func (p *Parser) singleStmt() (Node, error) {
+func (p *Parser) singleStmt() (Generatable, error) {
 	var n Node
 	if p.tokenProcessor.ConsumeReturn() {
 		l, err := p.expr()
@@ -287,7 +287,7 @@ func (p *Parser) singleStmt() (Node, error) {
 	return n, nil
 }
 
-func (p *Parser) ifstmt() (Node, error) {
+func (p *Parser) ifstmt() (Generatable, error) {
 	if t := p.tokenProcessor.ConsumeKind(token.If); t == nil {
 		return nil, nil
 	}
@@ -307,7 +307,7 @@ func (p *Parser) ifstmt() (Node, error) {
 		return nil, fail.Wrap(err)
 	}
 
-	var secondStmt Node = nopNode{}
+	var secondStmt Generatable = nopNode{}
 	if t := p.tokenProcessor.ConsumeKind(token.Else); t != nil {
 		var err error
 		secondStmt, err = p.stmt()
@@ -319,7 +319,7 @@ func (p *Parser) ifstmt() (Node, error) {
 	return newIf(condition, firstStmt, secondStmt), nil
 }
 
-func (p *Parser) whilestmt() (Node, error) {
+func (p *Parser) whilestmt() (Generatable, error) {
 	if t := p.tokenProcessor.ConsumeKind(token.While); t == nil {
 		return nil, nil
 	}
@@ -343,7 +343,7 @@ func (p *Parser) whilestmt() (Node, error) {
 	return newWhile(condition, stmt), nil
 }
 
-func (p *Parser) forstmt() (Node, error) {
+func (p *Parser) forstmt() (Generatable, error) {
 	if t := p.tokenProcessor.ConsumeKind(token.For); t == nil {
 		return nil, nil
 	}
@@ -352,7 +352,7 @@ func (p *Parser) forstmt() (Node, error) {
 		return nil, fail.Wrap(err)
 	}
 
-	var init Node
+	var init Generatable
 	if !p.tokenProcessor.ConsumeReserved(";") {
 		var err error
 		init, err = p.expr()
@@ -365,7 +365,7 @@ func (p *Parser) forstmt() (Node, error) {
 		}
 	}
 
-	var condition Node
+	var condition Generatable
 	if !p.tokenProcessor.ConsumeReserved(";") {
 		var err error
 		condition, err = p.expr()
@@ -378,7 +378,7 @@ func (p *Parser) forstmt() (Node, error) {
 		}
 	}
 
-	var update Node
+	var update Generatable
 	if !p.tokenProcessor.ConsumeReserved(")") {
 		var err error
 		update, err = p.expr()
@@ -538,7 +538,7 @@ func (p *Parser) unary() (Node, error) {
 	return p.primary()
 }
 
-func (p *Parser) Parse() ([]Node, error) {
+func (p *Parser) Parse() ([]Generatable, error) {
 	nodes, err := p.program()
 	if err != nil {
 		return nil, err
