@@ -267,7 +267,7 @@ func (p *Parser) block() (Generatable, error) {
 }
 
 func (p *Parser) singleStmt() (Generatable, error) {
-	var n Node
+	var n Generatable
 	if p.tokenProcessor.ConsumeReturn() {
 		l, err := p.expr()
 		if err != nil {
