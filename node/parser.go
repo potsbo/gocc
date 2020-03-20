@@ -438,33 +438,35 @@ func (p *Parser) primary() (Node, error) {
 }
 
 func (p *Parser) funcCall() (Node, error) {
-	if str, ok := p.tokenProcessor.ConsumeIdent(); ok {
-		if p.tokenProcessor.ConsumeReserved("(") {
-			args := []Generatable{}
-			for {
-				arg, err := p.expr()
-				if err != nil {
-					return nil, fail.Wrap(err)
-				}
-				if arg == nil {
-					break
-				}
-				args = append(args, arg)
-				if !p.tokenProcessor.ConsumeReserved(",") {
-					break
-				}
-			}
-			n := newFuncCall(str, args)
-			// TODO: parse args
-			if err := p.tokenProcessor.Expect(")"); err != nil {
+	str, ok := p.tokenProcessor.ConsumeIdent()
+	if !ok {
+		return nil, nil
+	}
+
+	if p.tokenProcessor.ConsumeReserved("(") {
+		args := []Generatable{}
+		for {
+			arg, err := p.expr()
+			if err != nil {
 				return nil, fail.Wrap(err)
 			}
-			return n, nil
+			if arg == nil {
+				break
+			}
+			args = append(args, arg)
+			if !p.tokenProcessor.ConsumeReserved(",") {
+				break
+			}
 		}
-		v := p.findLocal(str)
-		return newLValue(v.offset), nil
+		n := newFuncCall(str, args)
+		// TODO: parse args
+		if err := p.tokenProcessor.Expect(")"); err != nil {
+			return nil, fail.Wrap(err)
+		}
+		return n, nil
 	}
-	return nil, nil
+	v := p.findLocal(str)
+	return newLValue(v.offset), nil
 }
 
 func (p *Parser) findLocal(str string) lvar {
