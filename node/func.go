@@ -10,11 +10,11 @@ import (
 type nodeFunc struct {
 	offset int
 	name   string
-	block  Node
-	args   []Node
+	block  Generatable
+	args   []Pointable
 }
 
-func newNodeFunc(name string, args []Node, offset int, block Node) Node {
+func newNodeFunc(name string, args []Pointable, offset int, block Generatable) Node {
 	return &nodeFunc{
 		args:   args,
 		offset: offset + len(args)*8,

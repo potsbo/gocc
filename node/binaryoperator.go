@@ -8,11 +8,11 @@ import (
 
 type nodeBinaryOperator struct {
 	kind Kind
-	lhs  Node
-	rhs  Node
+	lhs  Generatable
+	rhs  Generatable
 }
 
-func newBinaryOperator(kind Kind, lhs, rhs Node) Node {
+func newBinaryOperator(kind Kind, lhs, rhs Generatable) Node {
 	return &nodeBinaryOperator{
 		kind: kind,
 		lhs:  lhs,

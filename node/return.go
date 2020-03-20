@@ -7,10 +7,10 @@ import (
 )
 
 type nodeReturn struct {
-	val Node
+	val Generatable
 }
 
-func newReturn(val Node) Node {
+func newReturn(val Generatable) Node {
 	return &nodeReturn{
 		val: val,
 	}

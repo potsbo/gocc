@@ -200,7 +200,7 @@ func (p *Parser) funcDef() (Node, error) {
 	if err := p.tokenProcessor.Expect("("); err != nil {
 		return nil, fail.Wrap(err)
 	}
-	args := []Node{}
+	args := []Pointable{}
 	for {
 		vName, ok := p.tokenProcessor.ConsumeIdent()
 		if !ok {
