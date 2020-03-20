@@ -336,7 +336,7 @@ func isIdent(str string) string {
 }
 
 func isReserved(str string) string {
-	tokens := []string{"+", "-", "*", "/", "(", ")", "==", ">=", "<=", ">", "<", "!=", ";", "=", "{", "}"}
+	tokens := []string{"+", "-", "*", "/", "(", ")", "==", ">=", "<=", ">", "<", "!=", ";", "=", "{", "}", ","}
 	for _, t := range tokens {
 		if strings.HasPrefix(str, t) {
 			return t

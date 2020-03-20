@@ -10,6 +10,7 @@ import (
 var (
 	registers = []string{
 		"rdi",
+		"rsi",
 	}
 )
 
@@ -37,10 +38,13 @@ func (n *nodeFuncCall) Generate() (string, error) {
 			lines,
 			fmt.Sprintf("# args[%d]", i),
 			l,
-			fmt.Sprintf("  mov rax, %s", regName),
+			fmt.Sprintf("  pop %s", regName),
 		)
 	}
-	lines = append(lines, fmt.Sprintf("  call _%s", n.name))
+	lines = append(lines,
+		fmt.Sprintf("  call _%s", n.name),
+		"  push rax",
+	)
 
 	return strings.Join(lines, "\n"), nil
 }

@@ -447,6 +447,9 @@ func (p *Parser) funcCall() (Node, error) {
 					break
 				}
 				args = append(args, arg)
+				if !p.tokenProcessor.ConsumeReserved(",") {
+					break
+				}
 			}
 			n := newFuncCall(str, args)
 			// TODO: parse args
