@@ -440,7 +440,7 @@ func (p *Parser) primary() (Node, error) {
 func (p *Parser) funcCall() (Node, error) {
 	if str, ok := p.tokenProcessor.ConsumeIdent(); ok {
 		if p.tokenProcessor.ConsumeReserved("(") {
-			args := []Node{}
+			args := []Generatable{}
 			for {
 				arg, err := p.expr()
 				if err != nil {

@@ -16,10 +16,10 @@ var (
 
 type nodeFuncCall struct {
 	name string
-	args []Node
+	args []Generatable
 }
 
-func newFuncCall(name string, args []Node) Node {
+func newFuncCall(name string, args []Generatable) Node {
 	return &nodeFuncCall{name, args}
 }
 
