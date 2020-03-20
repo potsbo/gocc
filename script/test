@@ -25,6 +25,7 @@ try() {
 
 gcc -c foo.c -o foo.o
 
+try 3 'main() { x = 3; y = &x; return *y; }'
 try 0 "main() {return 0;}"
 try 42 "main(){return 42;}"
 try 21 "main(){return 5+20-4;}"
