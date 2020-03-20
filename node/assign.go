@@ -45,7 +45,3 @@ func (n *nodeAssign) Generate() (string, error) {
 
 	return strings.Join(lines, "\n"), nil
 }
-
-func (n *nodeAssign) Kind() Kind {
-	return Assign
-}

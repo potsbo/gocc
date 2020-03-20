@@ -34,7 +34,3 @@ func (n *nodeBlock) Generate() (string, error) {
 func (n *nodeBlock) GeneratePointer() (string, error) {
 	return "", NoOffsetError
 }
-
-func (n *nodeBlock) Kind() Kind {
-	return Block
-}

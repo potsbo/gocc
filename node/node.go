@@ -49,9 +49,16 @@ var (
 )
 
 type Node interface {
+	Generatable
+	Pointable
+}
+
+type Generatable interface {
 	Generate() (string, error)
+}
+
+type Pointable interface {
 	GeneratePointer() (string, error)
-	Kind() Kind
 }
 
 func newLabelNum() int {
@@ -63,4 +70,3 @@ type nopNode struct{}
 
 func (n nopNode) Generate() (string, error)        { return "", nil }
 func (n nopNode) GeneratePointer() (string, error) { return "", nil }
-func (n nopNode) Kind() Kind                       { return Nop }

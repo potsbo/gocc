@@ -50,7 +50,3 @@ func (n *nodeWhile) Generate() (string, error) {
 func (n *nodeWhile) GeneratePointer() (string, error) {
 	return "", NoOffsetError
 }
-
-func (n *nodeWhile) Kind() Kind {
-	return While
-}

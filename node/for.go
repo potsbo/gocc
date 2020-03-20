@@ -76,7 +76,3 @@ func (n *nodeFor) Generate() (string, error) {
 func (n *nodeFor) GeneratePointer() (string, error) {
 	return "", NoOffsetError
 }
-
-func (n *nodeFor) Kind() Kind {
-	return For
-}

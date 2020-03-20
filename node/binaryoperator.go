@@ -97,7 +97,3 @@ func (n *nodeBinaryOperator) Generate() (string, error) {
 	lines = append(lines, "  push rax")
 	return strings.Join(lines, "\n"), nil
 }
-
-func (n *nodeBinaryOperator) Kind() Kind {
-	return n.kind
-}

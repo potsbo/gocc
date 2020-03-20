@@ -30,7 +30,3 @@ func (n *nodeLValue) GeneratePointer() (string, error) {
 func (n *nodeLValue) Generate() (string, error) {
 	return newNodeDeref(newNodeAddr(n)).Generate()
 }
-
-func (n *nodeLValue) Kind() Kind {
-	return LVar
-}

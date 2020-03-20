@@ -57,7 +57,3 @@ func (n *nodeIf) Generate() (string, error) {
 func (n *nodeIf) GeneratePointer() (string, error) {
 	return "", NoOffsetError
 }
-
-func (n *nodeIf) Kind() Kind {
-	return If
-}

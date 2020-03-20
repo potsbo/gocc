@@ -8,12 +8,12 @@ import (
 )
 
 type nodeDeref struct {
-	n Node
+	child Generatable
 }
 
-func newNodeDeref(n Node) Node {
+func newNodeDeref(g Generatable) Node {
 	return &nodeDeref{
-		n: n,
+		child: g,
 	}
 }
 
@@ -22,7 +22,7 @@ func (n *nodeDeref) GeneratePointer() (string, error) {
 }
 
 func (n *nodeDeref) Generate() (string, error) {
-	l, err := n.n.Generate()
+	l, err := n.child.Generate()
 	if err != nil {
 		return "", fail.Wrap(err)
 	}
@@ -39,8 +39,4 @@ func deref(l string) (string, error) {
 		fmt.Sprintf("  push rax"),
 	}
 	return strings.Join(lines, "\n"), nil
-}
-
-func (n *nodeDeref) Kind() Kind {
-	return LVar
 }

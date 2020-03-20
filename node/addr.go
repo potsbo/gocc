@@ -3,11 +3,11 @@ package node
 import "github.com/srvc/fail"
 
 type nodeAddr struct {
-	n Node
+	p Pointable
 }
 
-func newNodeAddr(n Node) Node {
-	return &nodeAddr{n}
+func newNodeAddr(p Pointable) Node {
+	return &nodeAddr{p}
 }
 
 func (n *nodeAddr) GeneratePointer() (string, error) {
@@ -15,9 +15,5 @@ func (n *nodeAddr) GeneratePointer() (string, error) {
 }
 
 func (n *nodeAddr) Generate() (string, error) {
-	return n.n.GeneratePointer()
-}
-
-func (n *nodeAddr) Kind() Kind {
-	return LVar
+	return n.p.GeneratePointer()
 }
