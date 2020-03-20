@@ -9,12 +9,14 @@ import (
 
 type Parser struct {
 	tokenProcessor *token.Processor
-	locals         []lvar
+	locals         map[string]lvar
 }
 
 type lvar struct {
-	str    string
-	offset int
+	typeName string
+	name     string
+	offset   int
+	size     int
 }
 
 func NewParser(t *token.Processor) Parser {
@@ -206,7 +208,14 @@ func (p *Parser) funcDef() (Generatable, error) {
 		if !ok {
 			break
 		}
-		v := p.findLocal(vName)
+		err := p.declare("int", vName) // TODO: fix
+		if err != nil {
+			return nil, fail.Wrap(err)
+		}
+		v, err := p.findLocal(vName)
+		if err != nil {
+			return nil, fail.Wrap(err)
+		}
 		args = append(args, newLValue(v.offset))
 		if !p.tokenProcessor.ConsumeReserved(",") {
 			break
@@ -266,25 +275,55 @@ func (p *Parser) block() (Generatable, error) {
 	return NewNodeBlock(nodes), nil
 }
 
-func (p *Parser) singleStmt() (Generatable, error) {
-	var n Generatable
+func (p *Parser) singleStmt() (n Generatable, err error) {
+	defer func() {
+		if err == nil {
+			err = p.tokenProcessor.Expect(";")
+		}
+	}()
+
 	if p.tokenProcessor.ConsumeReturn() {
 		l, err := p.expr()
 		if err != nil {
 			return nil, fail.Wrap(err)
 		}
-		n = newReturn(l)
-	} else {
-		var err error
-		n, err = p.expr()
-		if err != nil {
+		return newReturn(l), nil
+	}
+
+	if p.tokenProcessor.ConsumeReserved("int") {
+		varName, ok := p.tokenProcessor.ConsumeIdent()
+		if !ok {
+			return nil, fail.New("Expected identifier")
+		}
+		if err = p.declare("int", varName); err != nil {
 			return nil, fail.Wrap(err)
 		}
+		return nopNode{}, nil
 	}
-	if err := p.tokenProcessor.Expect(";"); err != nil {
+
+	n, err = p.expr()
+	if err != nil {
 		return nil, fail.Wrap(err)
 	}
 	return n, nil
+}
+
+func (p *Parser) declare(typeName string, varName string) error {
+	_, exists := p.locals[varName]
+	if exists {
+		return fail.Errorf("Variable with name %q has already been declared", varName)
+	}
+
+	totalOffset := 0
+	for _, local := range p.locals {
+		totalOffset += local.size
+	}
+
+	n := lvar{offset: totalOffset + 8, size: 8, name: varName}
+	p.locals[varName] = n
+
+	return nil
+
 }
 
 func (p *Parser) ifstmt() (Generatable, error) {
@@ -466,27 +505,23 @@ func (p *Parser) resolveIdent() (Node, error) {
 		}
 		return n, nil
 	}
-	v := p.findLocal(ident)
+	v, err := p.findLocal(ident)
+	if err != nil {
+		return nil, fail.Wrap(err)
+	}
 	return newLValue(v.offset), nil
 }
 
-func (p *Parser) findLocal(str string) lvar {
-	lastOffset := 0
-	for _, local := range p.locals {
-		if local.str == str {
-			return local
-		}
-		lastOffset = local.offset
+func (p *Parser) findLocal(str string) (lvar, error) {
+	v, ok := p.locals[str]
+	if !ok {
+		return lvar{}, fail.Errorf("Use of undeclared variable %q", str)
 	}
-
-	n := lvar{offset: lastOffset + 8, str: str}
-	p.locals = append(p.locals, n)
-
-	return n
+	return v, nil
 }
 
 func (p *Parser) resetLocal() {
-	p.locals = nil
+	p.locals = map[string]lvar{}
 }
 
 func (p *Parser) assign() (Node, error) {
