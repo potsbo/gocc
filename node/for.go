@@ -14,7 +14,7 @@ type nodeFor struct {
 	stmt      Generatable
 }
 
-func newFor(init, c, update, stmt Generatable) Node {
+func newFor(init, c, update, stmt Generatable) Generatable {
 	return &nodeFor{
 		init:      init,
 		condition: c,
@@ -71,8 +71,4 @@ func (n *nodeFor) Generate() (string, error) {
 		"# forstmt end",
 	}
 	return strings.Join(lines, "\n"), nil
-}
-
-func (n *nodeFor) GeneratePointer() (string, error) {
-	return "", NoOffsetError
 }

@@ -12,7 +12,7 @@ type nodeWhile struct {
 	stmt      Generatable
 }
 
-func newWhile(c, stmt Generatable) Node {
+func newWhile(c, stmt Generatable) Generatable {
 	return &nodeWhile{
 		condition: c,
 		stmt:      stmt,
@@ -45,8 +45,4 @@ func (n *nodeWhile) Generate() (string, error) {
 		"# whilestmt end",
 	}
 	return strings.Join(lines, "\n"), nil
-}
-
-func (n *nodeWhile) GeneratePointer() (string, error) {
-	return "", NoOffsetError
 }

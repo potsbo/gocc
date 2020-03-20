@@ -10,7 +10,7 @@ type nodeReturn struct {
 	val Generatable
 }
 
-func newReturn(val Generatable) Node {
+func newReturn(val Generatable) Generatable {
 	return &nodeReturn{
 		val: val,
 	}
@@ -31,8 +31,4 @@ func (n *nodeReturn) Generate() (string, error) {
 		"# epilogue end",
 	}
 	return strings.Join(lines, "\n"), nil
-}
-
-func (n *nodeReturn) GeneratePointer() (string, error) {
-	return "", NoOffsetError
 }

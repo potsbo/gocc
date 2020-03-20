@@ -10,7 +10,7 @@ type nodeBlock struct {
 	stmts []Generatable
 }
 
-func NewNodeBlock(stmts []Generatable) Node {
+func NewNodeBlock(stmts []Generatable) Generatable {
 	return &nodeBlock{stmts}
 }
 
@@ -29,8 +29,4 @@ func (n *nodeBlock) Generate() (string, error) {
 		)
 	}
 	return strings.Join(lines, "\n"), nil
-}
-
-func (n *nodeBlock) GeneratePointer() (string, error) {
-	return "", NoOffsetError
 }

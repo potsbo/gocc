@@ -48,7 +48,3 @@ func (n *nodeFuncCall) Generate() (string, error) {
 
 	return strings.Join(lines, "\n"), nil
 }
-
-func (n *nodeFuncCall) GeneratePointer() (string, error) {
-	return "", NoOffsetError
-}

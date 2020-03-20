@@ -13,7 +13,7 @@ type nodeIf struct {
 	falseStatement Generatable
 }
 
-func newIf(c, t, f Generatable) Node {
+func newIf(c, t, f Generatable) Generatable {
 	return &nodeIf{
 		condition:      c,
 		trueStatement:  t,
@@ -52,8 +52,4 @@ func (n *nodeIf) Generate() (string, error) {
 		"# ifstmt end",
 	}
 	return strings.Join(lines, "\n"), nil
-}
-
-func (n *nodeIf) GeneratePointer() (string, error) {
-	return "", NoOffsetError
 }
