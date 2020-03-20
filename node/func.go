@@ -17,13 +17,26 @@ type nodeFunc struct {
 func newNodeFunc(name string, args []Node, offset int, block Node) Node {
 	return &nodeFunc{
 		args:   args,
-		offset: offset,
+		offset: offset + len(args)*8,
 		name:   name,
 		block:  block,
 	}
 }
 
 func (n *nodeFunc) Generate() (string, error) {
+	argsLines := []string{}
+	for i, arg := range n.args {
+		l, err := arg.GeneratePointer()
+		if err != nil {
+			return "", fail.Wrap(err)
+		}
+		argsLines = append(
+			argsLines,
+			l,
+			"  pop rax",
+			fmt.Sprintf("  mov [rax], %s", registers[i]),
+		)
+	}
 	l, err := n.block.Generate()
 	if err != nil {
 		return "", fail.Wrap(err)
@@ -34,9 +47,13 @@ func (n *nodeFunc) Generate() (string, error) {
 		"  push rbp",
 		"  mov rbp, rsp",
 		fmt.Sprintf("  sub rsp, %d", n.offset),
+	}
+
+	lines = append(lines, argsLines...)
+	lines = append(lines,
 		"# prologue end",
 		l,
-	}
+	)
 	return strings.Join(lines, "\n"), nil
 }
 

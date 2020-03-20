@@ -208,6 +208,9 @@ func (p *Parser) funcDef() (Node, error) {
 		}
 		v := p.findLocal(vName)
 		args = append(args, newLValue(v.offset))
+		if !p.tokenProcessor.ConsumeReserved(",") {
+			break
+		}
 	}
 	if err := p.tokenProcessor.Expect(")"); err != nil {
 		return nil, fail.Wrap(err)
