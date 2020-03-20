@@ -3,8 +3,6 @@ package node
 import (
 	"fmt"
 	"strings"
-
-	"github.com/srvc/fail"
 )
 
 type nodeLValue struct {
@@ -30,19 +28,7 @@ func (n *nodeLValue) GeneratePointer() (string, error) {
 }
 
 func (n *nodeLValue) Generate() (string, error) {
-	l, err := n.GeneratePointer()
-	if err != nil {
-		return "", fail.Wrap(err)
-	}
-	lines := []string{
-		"# LVar",
-		l,
-		"## pushing the var value with following pointer",
-		fmt.Sprintf("  pop rax"),
-		fmt.Sprintf("  mov rax, [rax]"),
-		fmt.Sprintf("  push rax"),
-	}
-	return strings.Join(lines, "\n"), nil
+	return newNodeDeref(newNodeAddr(n)).Generate()
 }
 
 func (n *nodeLValue) Kind() Kind {

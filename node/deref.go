@@ -26,6 +26,10 @@ func (n *nodeDeref) Generate() (string, error) {
 	if err != nil {
 		return "", fail.Wrap(err)
 	}
+	return deref(l)
+}
+
+func deref(l string) (string, error) {
 	lines := []string{
 		"# LVar",
 		l,
