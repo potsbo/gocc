@@ -193,6 +193,9 @@ func (p *Parser) program() ([]Generatable, error) {
 
 func (p *Parser) funcDef() (Generatable, error) {
 	p.resetLocal()
+	if !p.tokenProcessor.ConsumeReserved("int") {
+		return nil, nil
+	}
 	fname, ok := p.tokenProcessor.ConsumeIdent()
 	if !ok {
 		// TODO: should be error?
