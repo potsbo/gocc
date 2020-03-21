@@ -198,12 +198,11 @@ func (p *Parser) program() ([]Generatable, error) {
 
 func (p *Parser) funcDef() (Generatable, error) {
 	p.resetLocal()
-	if !p.tokenProcessor.ConsumeReserved("int") {
-		return nil, nil
+	dec, err := p.declare()
+	if err != nil {
+		return nil, fail.Wrap(err)
 	}
-	fname, ok := p.tokenProcessor.ConsumeIdent()
-	if !ok {
-		// TODO: should be error?
+	if dec == nil {
 		return nil, nil
 	}
 
@@ -244,7 +243,7 @@ func (p *Parser) funcDef() (Generatable, error) {
 	}
 	offset := len(p.locals)*8 + 32 // TODO: not to use magic number
 
-	return newNodeFunc(fname, args, offset, n), nil
+	return newNodeFunc(dec.name, args, offset, n), nil
 }
 
 func match(patterns ...func() (Generatable, error)) (Generatable, error) {
