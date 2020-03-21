@@ -63,8 +63,8 @@ try 44 'int main(){int a; a = 0; int i; for (i = 0; i <= 10; i = i+1) { a = a + 
 try 0 'int main(){return foo();}'
 try 123 'int main(){return bar(123);}'
 try 46 'int main(){return add(12, 34);}'
-try 1 'int asis(a) { return a; } int main(){return asis(1);}'
-try 3 'int add(a, b) { return a + b; } int main(){return add(1, 2);}'
-try 233 'int fib(n) { if (n < 2) { return 1; } return fib(n - 1) + fib(n - 2); } int main(){ return fib(12); }'
+try 1 'int asis(int a) { return a; } int main(){return asis(1);}'
+try 3 'int add(int a, int b) { return a + b; } int main(){return add(1, 2);}'
+try 233 'int fib(int n) { if (n < 2) { return 1; } return fib(n - 1) + fib(n - 2); } int main(){ return fib(12); }'
 
 echo OK

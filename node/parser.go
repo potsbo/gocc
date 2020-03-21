@@ -19,6 +19,11 @@ type lvar struct {
 	size     int
 }
 
+type declaration struct {
+	name     string
+	typeName string
+}
+
 func NewParser(t *token.Processor) Parser {
 	return Parser{tokenProcessor: t}
 }
@@ -207,15 +212,20 @@ func (p *Parser) funcDef() (Generatable, error) {
 	}
 	args := []Pointable{}
 	for {
-		vName, ok := p.tokenProcessor.ConsumeIdent()
-		if !ok {
-			break
-		}
-		err := p.declare("int", vName) // TODO: fix
+		dec, err := p.declare()
 		if err != nil {
 			return nil, fail.Wrap(err)
 		}
-		v, err := p.findLocal(vName)
+		if dec == nil {
+			break
+		}
+
+		err = p.declareVar(*dec) // TODO: fix
+		if err != nil {
+			return nil, fail.Wrap(err)
+		}
+
+		v, err := p.findLocal(dec.name)
 		if err != nil {
 			return nil, fail.Wrap(err)
 		}
@@ -293,15 +303,15 @@ func (p *Parser) singleStmt() (n Generatable, err error) {
 		return newReturn(l), nil
 	}
 
-	if p.tokenProcessor.ConsumeReserved("int") {
-		varName, ok := p.tokenProcessor.ConsumeIdent()
-		if !ok {
-			return nil, fail.New("Expected identifier")
-		}
-		if err = p.declare("int", varName); err != nil {
+	{
+		dec, err := p.declare()
+		if err != nil {
 			return nil, fail.Wrap(err)
 		}
-		return nopNode{}, nil
+		if dec != nil {
+			p.declareVar(*dec)
+			return nopNode{}, nil
+		}
 	}
 
 	n, err = p.expr()
@@ -311,10 +321,28 @@ func (p *Parser) singleStmt() (n Generatable, err error) {
 	return n, nil
 }
 
-func (p *Parser) declare(typeName string, varName string) error {
-	_, exists := p.locals[varName]
+var types = []string{"int"}
+
+func (p *Parser) declare() (*declaration, error) {
+	for _, t := range types {
+		if !p.tokenProcessor.ConsumeReserved(t) {
+			continue
+		}
+		// func or var
+		identName, ok := p.tokenProcessor.ConsumeIdent()
+		if !ok {
+			return nil, fail.New("Expected identifier")
+		}
+		return &declaration{name: identName, typeName: t}, nil
+	}
+
+	return nil, nil
+}
+
+func (p *Parser) declareVar(dec declaration) error {
+	_, exists := p.locals[dec.name]
 	if exists {
-		return fail.Errorf("Variable with name %q has already been declared", varName)
+		return fail.Errorf("Variable with name %q has already been declared", dec.name)
 	}
 
 	totalOffset := 0
@@ -322,8 +350,8 @@ func (p *Parser) declare(typeName string, varName string) error {
 		totalOffset += local.size
 	}
 
-	n := lvar{offset: totalOffset + 8, size: 8, name: varName}
-	p.locals[varName] = n
+	n := lvar{offset: totalOffset + 8, size: 8, name: dec.name}
+	p.locals[dec.name] = n
 
 	return nil
 
