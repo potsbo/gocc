@@ -4,6 +4,7 @@ import (
 	"errors"
 
 	"github.com/potsbo/gocc/token"
+	"github.com/potsbo/gocc/types"
 	"github.com/srvc/fail"
 )
 
@@ -13,15 +14,15 @@ type Parser struct {
 }
 
 type lvar struct {
-	typeName string
-	name     string
-	offset   int
-	size     int
+	Type   types.Type
+	name   string
+	offset int
+	size   int
 }
 
 type declaration struct {
-	name     string
-	typeName string
+	name string
+	Type types.Type
 }
 
 func NewParser(t *token.Processor) Parser {
@@ -320,11 +321,9 @@ func (p *Parser) singleStmt() (n Generatable, err error) {
 	return n, nil
 }
 
-var types = []string{"int"}
-
 func (p *Parser) declare() (*declaration, error) {
-	for _, t := range types {
-		if !p.tokenProcessor.ConsumeReserved(t) {
+	for _, t := range types.All() {
+		if !p.tokenProcessor.ConsumeReserved(t.Identifier()) {
 			continue
 		}
 		// func or var
@@ -332,7 +331,7 @@ func (p *Parser) declare() (*declaration, error) {
 		if !ok {
 			return nil, fail.New("Expected identifier")
 		}
-		return &declaration{name: identName, typeName: t}, nil
+		return &declaration{name: identName, Type: t.Type()}, nil
 	}
 
 	return nil, nil
