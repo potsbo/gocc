@@ -39,8 +39,5 @@ func (n *nodeLValue) GeneratePointer() (string, error) {
 
 func (n *nodeLValue) Generate() (string, error) {
 	addr := newNodeAddr(n)
-	if n.t.Kind() == types.Pointer {
-		addr = newNodeDeref(addr)
-	}
 	return newNodeDeref(addr).Generate()
 }

@@ -328,9 +328,7 @@ func (p *Parser) declare() (*declaration, error) {
 		}
 		t := k.Type()
 
-		isPtr := false // TODO: support multiple '*'
-		isPtr = p.tokenProcessor.ConsumeReserved("*")
-		if isPtr {
+		for p.tokenProcessor.ConsumeReserved("*") {
 			t = types.PointingTo(t)
 		}
 
