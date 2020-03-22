@@ -229,7 +229,7 @@ func (p *Parser) funcDef() (Generatable, error) {
 		if err != nil {
 			return nil, fail.Wrap(err)
 		}
-		args = append(args, newLValue(v.offset))
+		args = append(args, newLValue(v.name, v.offset, v.Type))
 		if !p.tokenProcessor.ConsumeReserved(",") {
 			break
 		}
@@ -322,16 +322,24 @@ func (p *Parser) singleStmt() (n Generatable, err error) {
 }
 
 func (p *Parser) declare() (*declaration, error) {
-	for _, t := range types.All() {
-		if !p.tokenProcessor.ConsumeReserved(t.Identifier()) {
+	for _, k := range types.All() {
+		if !p.tokenProcessor.ConsumeReserved(k.Identifier()) {
 			continue
 		}
+		t := k.Type()
+
+		isPtr := false // TODO: support multiple '*'
+		isPtr = p.tokenProcessor.ConsumeReserved("*")
+		if isPtr {
+			t = types.PointingTo(t)
+		}
+
 		// func or var
 		identName, ok := p.tokenProcessor.ConsumeIdent()
 		if !ok {
 			return nil, fail.New("Expected identifier")
 		}
-		return &declaration{name: identName, Type: t.Type()}, nil
+		return &declaration{name: identName, Type: t}, nil
 	}
 
 	return nil, nil
@@ -348,7 +356,7 @@ func (p *Parser) declareVar(dec declaration) error {
 		totalOffset += local.size
 	}
 
-	n := lvar{offset: totalOffset + 8, size: 8, name: dec.name}
+	n := lvar{offset: totalOffset + 8, size: 8, name: dec.name, Type: dec.Type}
 	p.locals[dec.name] = n
 
 	return nil
@@ -538,7 +546,8 @@ func (p *Parser) resolveIdent() (Node, error) {
 	if err != nil {
 		return nil, fail.Wrap(err)
 	}
-	return newLValue(v.offset), nil
+
+	return newLValue(v.name, v.offset, v.Type), nil
 }
 
 func (p *Parser) findLocal(str string) (lvar, error) {

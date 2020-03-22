@@ -38,6 +38,10 @@ func (k Kind) Type() Type {
 	return &typeImpl{kind: k}
 }
 
+func PointingTo(t Type) Type {
+	return &typeImpl{kind: Pointer, pointingTo: t}
+}
+
 func All() []Kind {
 	return []Kind{
 		Int,
