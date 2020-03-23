@@ -25,6 +25,10 @@ try() {
 
 gcc -c foo.c -o foo.o
 
+try 1 'int main() {int *p; alloc(&p, 1, 2, 4, 8); int *q; q = p + 0; return *q;}'
+try 2 'int main() {int *p; alloc(&p, 1, 2, 4, 8); int *q; q = p + 1; return *q;}'
+try 4 'int main() {int *p; alloc(&p, 1, 2, 4, 8); int *q; q = p + 2; return *q;}'
+try 8 'int main() {int *p; alloc(&p, 1, 2, 4, 8); int *q; q = p + 3; return *q;}'
 try 3 'int main() { int x; int *y; int **z; y = &x; x = 3; z = &y; return **z; }'
 try 3 'int main() { int x; int *y; y = &x;  x = 3; return *y; }'
 try 3 'int main() { int x; return 3; }'
