@@ -4,6 +4,7 @@ import (
 	"errors"
 
 	"github.com/potsbo/gocc/token"
+	"github.com/potsbo/gocc/types"
 )
 
 type Kind int
@@ -53,12 +54,39 @@ type Node interface {
 	Pointable
 }
 
+type TypedNode interface {
+	Node
+}
+
+func wrap(n Node, t types.Type) TypedNode {
+	if n == nil {
+		return nil
+	}
+	return &typedNodeImpl{
+		n, t,
+	}
+}
+
+func (t typedNodeImpl) Type() types.Type {
+	return t.t
+}
+
+type typedNodeImpl struct {
+	Node
+	t types.Type
+}
+
 type Generatable interface {
 	Generate() (string, error)
 }
 
 type Pointable interface {
 	GeneratePointer() (string, error)
+	Typed
+}
+
+type Typed interface {
+	Type() types.Type
 }
 
 func newLabelNum() int {

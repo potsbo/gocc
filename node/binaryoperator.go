@@ -3,6 +3,7 @@ package node
 import (
 	"strings"
 
+	"github.com/potsbo/gocc/types"
 	"github.com/srvc/fail"
 )
 
@@ -12,7 +13,7 @@ type nodeBinaryOperator struct {
 	rhs  Generatable
 }
 
-func newBinaryOperator(kind Kind, lhs, rhs Generatable) Node {
+func newBinaryOperator(kind Kind, lhs, rhs Generatable) TypedNode {
 	return &nodeBinaryOperator{
 		kind: kind,
 		lhs:  lhs,
@@ -96,4 +97,8 @@ func (n *nodeBinaryOperator) Generate() (string, error) {
 
 	lines = append(lines, "  push rax")
 	return strings.Join(lines, "\n"), nil
+}
+
+func (n *nodeBinaryOperator) Type() types.Type {
+	return nil
 }

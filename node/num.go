@@ -1,12 +1,16 @@
 package node
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/potsbo/gocc/types"
+)
 
 type nodeNum struct {
 	val int
 }
 
-func newnodeImplNum(n int) Node {
+func newnodeImplNum(n int) TypedNode {
 	return &nodeNum{
 		val: n,
 	}
@@ -18,4 +22,8 @@ func (n *nodeNum) Generate() (string, error) {
 
 func (n *nodeNum) GeneratePointer() (string, error) {
 	return "", NoOffsetError
+}
+
+func (n *nodeNum) Type() types.Type {
+	return types.NewInt()
 }

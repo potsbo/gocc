@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/potsbo/gocc/types"
 	"github.com/srvc/fail"
 )
 
@@ -11,7 +12,7 @@ type nodeDeref struct {
 	child Generatable
 }
 
-func newNodeDeref(g Generatable) Node {
+func newNodeDeref(g Generatable) TypedNode {
 	return &nodeDeref{
 		child: g,
 	}
@@ -27,6 +28,10 @@ func (n *nodeDeref) Generate() (string, error) {
 		return "", fail.Wrap(err)
 	}
 	return deref(l)
+}
+
+func (n *nodeDeref) Type() types.Type {
+	return nil // TODO
 }
 
 func deref(l string) (string, error) {

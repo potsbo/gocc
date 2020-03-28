@@ -14,7 +14,7 @@ type nodeLValue struct {
 	t      types.Type
 }
 
-func newLValue(name string, offset int, t types.Type) Node {
+func newLValue(name string, offset int, t types.Type) TypedNode {
 	return &nodeLValue{
 		name:   name,
 		offset: offset,
@@ -40,4 +40,8 @@ func (n *nodeLValue) GeneratePointer() (string, error) {
 func (n *nodeLValue) Generate() (string, error) {
 	addr := newNodeAddr(n)
 	return newNodeDeref(addr).Generate()
+}
+
+func (n *nodeLValue) Type() types.Type {
+	return n.t
 }

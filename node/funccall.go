@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/potsbo/gocc/types"
 	"github.com/srvc/fail"
 )
 
@@ -21,10 +22,11 @@ var (
 type nodeFuncCall struct {
 	name string
 	args []Generatable
+	t    types.Type
 }
 
-func newFuncCall(name string, args []Generatable) Node {
-	return &nodeFuncCall{name, args}
+func newFuncCall(name string, t types.Type, args []Generatable) TypedNode {
+	return &nodeFuncCall{name, args, t}
 }
 
 func (n *nodeFuncCall) Generate() (string, error) {
@@ -55,4 +57,8 @@ func (n *nodeFuncCall) Generate() (string, error) {
 
 func (n *nodeFuncCall) GeneratePointer() (string, error) {
 	return "", NoOffsetError
+}
+
+func (n *nodeFuncCall) Type() types.Type {
+	return n.t
 }

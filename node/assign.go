@@ -3,6 +3,7 @@ package node
 import (
 	"strings"
 
+	"github.com/potsbo/gocc/types"
 	"github.com/srvc/fail"
 )
 
@@ -11,7 +12,7 @@ type nodeAssign struct {
 	rhs Generatable
 }
 
-func newAssign(lhs Pointable, rhs Generatable) Node {
+func newAssign(lhs Pointable, rhs Generatable) TypedNode {
 	return &nodeAssign{
 		lhs: lhs,
 		rhs: rhs,
@@ -44,4 +45,8 @@ func (n *nodeAssign) Generate() (string, error) {
 	}
 
 	return strings.Join(lines, "\n"), nil
+}
+
+func (n *nodeAssign) Type() types.Type {
+	return n.lhs.Type()
 }

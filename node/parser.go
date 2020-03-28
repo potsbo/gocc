@@ -53,11 +53,12 @@ func (p *Parser) tryBinaryOperator(k Kind, lhsGetter, rhsGetter parseFunc) parse
 	}
 }
 
-func (p *Parser) equality() (Node, error) {
+func (p *Parser) equality() (TypedNode, error) {
 	node, err := p.relational()
 	if err != nil {
 		return nil, fail.Wrap(err)
 	}
+
 	for {
 		if p.tokenProcessor.ConsumeReserved("==") {
 			r, err := p.relational()
@@ -76,7 +77,7 @@ func (p *Parser) equality() (Node, error) {
 			node = newBinaryOperator(NotEqual, node, r)
 			continue
 		}
-		return node, nil
+		return wrap(node, types.NewInt()), nil
 	}
 }
 
@@ -135,6 +136,9 @@ func (p *Parser) add() (Node, error) {
 			if err != nil {
 				return nil, err
 			}
+			if node.Type() != nil && node.Type().Kind() == types.Pointer { // TODO: every TypedNode should return non nil Type
+				r = newBinaryOperator(Mul, r, newnodeImplNum(node.Type().PointingTo().Kind().Size()))
+			}
 			node = newBinaryOperator(Add, node, r)
 			continue
 		}
@@ -150,7 +154,7 @@ func (p *Parser) add() (Node, error) {
 	}
 }
 
-func (p *Parser) mul() (Node, error) {
+func (p *Parser) mul() (TypedNode, error) {
 	node, err := p.unary()
 	if err != nil {
 		return nil, fail.Wrap(err)
@@ -473,11 +477,11 @@ func (p *Parser) forstmt() (Generatable, error) {
 	return newFor(init, condition, update, stmt), nil
 }
 
-func (p *Parser) expr() (Node, error) {
+func (p *Parser) expr() (TypedNode, error) {
 	return p.assign()
 }
 
-func (p *Parser) primary() (Node, error) {
+func (p *Parser) primary() (TypedNode, error) {
 	if p.tokenProcessor.ConsumeReserved("(") {
 		node, err := p.expr()
 		if err != nil {
@@ -512,12 +516,13 @@ func (p *Parser) primary() (Node, error) {
 }
 
 // parse func or var
-func (p *Parser) resolveIdent() (Node, error) {
+func (p *Parser) resolveIdent() (TypedNode, error) {
 	ident, ok := p.tokenProcessor.ConsumeIdent()
 	if !ok {
 		return nil, nil
 	}
 
+	// if function
 	if p.tokenProcessor.ConsumeReserved("(") {
 		args := []Generatable{}
 		for {
@@ -533,13 +538,16 @@ func (p *Parser) resolveIdent() (Node, error) {
 				break
 			}
 		}
-		n := newFuncCall(ident, args)
+
+		n := newFuncCall(ident, types.NewInt(), args) // FIXME: not int
 		// TODO: parse args
 		if err := p.tokenProcessor.Expect(")"); err != nil {
 			return nil, fail.Wrap(err)
 		}
 		return n, nil
 	}
+
+	// if not function, should be a var
 	v, err := p.findLocal(ident)
 	if err != nil {
 		return nil, fail.Wrap(err)
@@ -560,7 +568,7 @@ func (p *Parser) resetLocal() {
 	p.locals = map[string]lvar{}
 }
 
-func (p *Parser) assign() (Node, error) {
+func (p *Parser) assign() (TypedNode, error) {
 	n, err := p.equality()
 	if err != nil {
 		return nil, fail.Wrap(err)
@@ -576,7 +584,7 @@ func (p *Parser) assign() (Node, error) {
 	return n, nil
 }
 
-func (p *Parser) unary() (Node, error) {
+func (p *Parser) unary() (TypedNode, error) {
 	if p.tokenProcessor.ConsumeReserved("+") {
 		n, err := p.primary()
 		if err != nil {
